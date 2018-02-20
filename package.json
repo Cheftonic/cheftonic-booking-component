@@ -1,8 +1,11 @@
 {
-  "name": "@stencil/starter",
-  "private": true,
+  "name": "@cheftonic/cheftonic-booking-component",
+  "private": false,
   "version": "0.0.1",
-  "description": "Stencil App Starter",
+  "description": "Cheftonic booking web component",
+  "main": "dist/cheftonic-booking-component.js",
+  "types": "dist/types/components.d.ts",
+  "collection": "dist/collection/collection-manifest.json",
   "files": [
     "dist/"
   ],
@@ -15,7 +18,7 @@
     "test.watch": "jest --watch --no-cache"
   },
   "dependencies": {
-    "@stencil/core": "^0.6.1",
+    "@stencil/core": "^0.6.3",
     "@stencil/router": "latest"
   },
   "devDependencies": {
@@ -26,14 +29,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ionic-team/stencil-app-starter.git"
+    "url": "git+https://github.com/Cheftonic/cheftonic-booking-component.git"
   },
-  "author": "Ionic Team",
+  "author": "Cheftonic Team",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ionic-team/stencil"
+    "url": "https://github.com/Cheftonic/cheftonic-booking-component"
   },
-  "homepage": "https://github.com/ionic-team/stencil",
+  "homepage": "https://github.com/Cheftonic/cheftonic-booking-component",
   "jest": {
     "transform": {
       "^.+\\.(ts|tsx)$": "<rootDir>/node_modules/@stencil/core/testing/jest.preprocessor.js"
