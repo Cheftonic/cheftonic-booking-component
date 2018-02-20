@@ -2,7 +2,7 @@ import { Component } from '@stencil/core';
 
 
 @Component({
-  tag: 'my-app',
+  tag: 'cheftonic-booking-component',
   styleUrl: 'my-app.css'
 })
 export class MyApp {

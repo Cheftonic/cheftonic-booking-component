@@ -1,7 +1,7 @@
 {
   "name": "@cheftonic/cheftonic-booking-component",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.0.1-RC1",
   "description": "Cheftonic booking web component",
   "main": "dist/cheftonic-booking-component.js",
   "types": "dist/types/components.d.ts",

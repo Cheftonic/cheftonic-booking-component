@@ -78,29 +78,29 @@ declare global {
 
 
 import {
-  MyApp as MyApp
+  MyApp as CheftonicBookingComponent
 } from './components/my-app/my-app';
 
 declare global {
-  interface HTMLMyAppElement extends MyApp, HTMLStencilElement {
+  interface HTMLCheftonicBookingComponentElement extends CheftonicBookingComponent, HTMLStencilElement {
   }
-  var HTMLMyAppElement: {
-    prototype: HTMLMyAppElement;
-    new (): HTMLMyAppElement;
+  var HTMLCheftonicBookingComponentElement: {
+    prototype: HTMLCheftonicBookingComponentElement;
+    new (): HTMLCheftonicBookingComponentElement;
   };
   interface HTMLElementTagNameMap {
-    "my-app": HTMLMyAppElement;
+    "cheftonic-booking-component": HTMLCheftonicBookingComponentElement;
   }
   interface ElementTagNameMap {
-    "my-app": HTMLMyAppElement;
+    "cheftonic-booking-component": HTMLCheftonicBookingComponentElement;
   }
   namespace JSX {
     interface IntrinsicElements {
-      "my-app": JSXElements.MyAppAttributes;
+      "cheftonic-booking-component": JSXElements.CheftonicBookingComponentAttributes;
     }
   }
   namespace JSXElements {
-    export interface MyAppAttributes extends HTMLAttributes {
+    export interface CheftonicBookingComponentAttributes extends HTMLAttributes {
       
     }
   }
