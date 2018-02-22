@@ -4,9 +4,6 @@
  * and imports for stencil collections that might be configured in your stencil.config.js file
  */
 
-import {
-  MatchResults,
-} from '@stencil/router';
 
 declare global {
   interface HTMLStencilElement extends HTMLElement {
@@ -18,29 +15,29 @@ declare global {
 
 
 import {
-  AppHome as AppHome
-} from './components/app-home/app-home';
+  CalendarComponent as CheftonicCalendar
+} from './components/calendar/calendar';
 
 declare global {
-  interface HTMLAppHomeElement extends AppHome, HTMLStencilElement {
+  interface HTMLCheftonicCalendarElement extends CheftonicCalendar, HTMLStencilElement {
   }
-  var HTMLAppHomeElement: {
-    prototype: HTMLAppHomeElement;
-    new (): HTMLAppHomeElement;
+  var HTMLCheftonicCalendarElement: {
+    prototype: HTMLCheftonicCalendarElement;
+    new (): HTMLCheftonicCalendarElement;
   };
   interface HTMLElementTagNameMap {
-    "app-home": HTMLAppHomeElement;
+    "cheftonic-calendar": HTMLCheftonicCalendarElement;
   }
   interface ElementTagNameMap {
-    "app-home": HTMLAppHomeElement;
+    "cheftonic-calendar": HTMLCheftonicCalendarElement;
   }
   namespace JSX {
     interface IntrinsicElements {
-      "app-home": JSXElements.AppHomeAttributes;
+      "cheftonic-calendar": JSXElements.CheftonicCalendarAttributes;
     }
   }
   namespace JSXElements {
-    export interface AppHomeAttributes extends HTMLAttributes {
+    export interface CheftonicCalendarAttributes extends HTMLAttributes {
       
     }
   }
@@ -48,60 +45,60 @@ declare global {
 
 
 import {
-  AppProfile as AppProfile
-} from './components/app-profile/app-profile';
+  HourMinuteComponent as CheftonicHourMinute
+} from './components/hour-minute/hour-minute';
 
 declare global {
-  interface HTMLAppProfileElement extends AppProfile, HTMLStencilElement {
+  interface HTMLCheftonicHourMinuteElement extends CheftonicHourMinute, HTMLStencilElement {
   }
-  var HTMLAppProfileElement: {
-    prototype: HTMLAppProfileElement;
-    new (): HTMLAppProfileElement;
+  var HTMLCheftonicHourMinuteElement: {
+    prototype: HTMLCheftonicHourMinuteElement;
+    new (): HTMLCheftonicHourMinuteElement;
   };
   interface HTMLElementTagNameMap {
-    "app-profile": HTMLAppProfileElement;
+    "cheftonic-hour-minute": HTMLCheftonicHourMinuteElement;
   }
   interface ElementTagNameMap {
-    "app-profile": HTMLAppProfileElement;
+    "cheftonic-hour-minute": HTMLCheftonicHourMinuteElement;
   }
   namespace JSX {
     interface IntrinsicElements {
-      "app-profile": JSXElements.AppProfileAttributes;
+      "cheftonic-hour-minute": JSXElements.CheftonicHourMinuteAttributes;
     }
   }
   namespace JSXElements {
-    export interface AppProfileAttributes extends HTMLAttributes {
-      match?: MatchResults;
+    export interface CheftonicHourMinuteAttributes extends HTMLAttributes {
+      
     }
   }
 }
 
 
 import {
-  MyApp as CheftonicBookingComponent
-} from './components/my-app/my-app';
+  MakeBookingComponent as MakeBooking
+} from './components/make-booking/make-booking';
 
 declare global {
-  interface HTMLCheftonicBookingComponentElement extends CheftonicBookingComponent, HTMLStencilElement {
+  interface HTMLMakeBookingElement extends MakeBooking, HTMLStencilElement {
   }
-  var HTMLCheftonicBookingComponentElement: {
-    prototype: HTMLCheftonicBookingComponentElement;
-    new (): HTMLCheftonicBookingComponentElement;
+  var HTMLMakeBookingElement: {
+    prototype: HTMLMakeBookingElement;
+    new (): HTMLMakeBookingElement;
   };
   interface HTMLElementTagNameMap {
-    "cheftonic-booking-component": HTMLCheftonicBookingComponentElement;
+    "make-booking": HTMLMakeBookingElement;
   }
   interface ElementTagNameMap {
-    "cheftonic-booking-component": HTMLCheftonicBookingComponentElement;
+    "make-booking": HTMLMakeBookingElement;
   }
   namespace JSX {
     interface IntrinsicElements {
-      "cheftonic-booking-component": JSXElements.CheftonicBookingComponentAttributes;
+      "make-booking": JSXElements.MakeBookingAttributes;
     }
   }
   namespace JSXElements {
-    export interface CheftonicBookingComponentAttributes extends HTMLAttributes {
-      
+    export interface MakeBookingAttributes extends HTMLAttributes {
+      restid?: string;
     }
   }
 }

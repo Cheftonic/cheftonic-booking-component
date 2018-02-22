@@ -1,0 +1,94 @@
+<ion-grid *ngIf="defaultCalendarConfig?.bigCalendar; else show_small">
+  <!-- FULL CALENDAR -->
+  <!-- TODAY&TOMORROW -->
+  <ion-row *ngIf="defaultCalendarConfig?.todayTomorrow">
+    <ion-col col-6 *ngFor="let day of parsedTodayTomorrow; let i=index">
+      <button [ngClass]="isSelectedDay(day.date)" [disabled]="isDisabled(day)" class="date" ion-button type="button" color="secondary" id="today" name="today" (click)="assignDate(day.date)">
+        <ion-grid>
+          <ion-row>
+            <ion-col col-3 class="dayAndTime">
+              {{day.dayOfMonth}}
+            </ion-col>
+            <ion-col>
+              <ion-row class="weekDay">
+                {{day.weekDayName}}
+              </ion-row>
+              <ion-row class="month">
+                {{day.monthName}}
+              </ion-row>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </button>
+    </ion-col>
+  </ion-row>
+
+  <!-- CALENDAR -->
+  <ion-row>
+    <ion-col class="fullWidth">
+    </ion-col>
+    <ion-col col-auto>
+        <button ion-button icon-only clear type="button"
+        (click)="previousMonth()"><ion-icon name="arrow-back"></ion-icon></button>
+    </ion-col>
+    <ion-col col-4>
+      <h2 class="calendarTitle">{{parsedDates.monthName}}</h2>
+      <h3 class="calendarYear">{{selectedYear}}</h3>
+    </ion-col>
+    <ion-col col-auto>
+        <button ion-button icon-only clear type="button" 
+        (click)="nextMonth()"><ion-icon name="arrow-forward"></ion-icon></button>
+    </ion-col>
+    <ion-col class="fullWidth">
+    </ion-col>
+  </ion-row>
+  
+  <ion-row class="calendar">
+    <ion-col *ngFor="let day of weekdays;">
+      {{day.value}}
+    </ion-col>
+  </ion-row>
+
+  <ion-row class="calendar" *ngFor="let week of parsedDates.week;">
+    <ion-col *ngFor="let wd of [1,2,3,4,5,6,0];">
+      <button *ngIf="week.day[wd]" [ngClass]="isSelectedDay(week.day[wd].date)" [disabled]="isDisabled(week.day[wd])" class="day" ion-button type="button" id="day" name="day" (click)="assignDate(week.day[wd].date)">{{week.day[wd].dayOfMonth}}</button>
+    </ion-col>
+  </ion-row>
+</ion-grid>
+<!-- SMALL CALENDAR -->
+<ng-template #show_small>
+  <ion-grid>
+    <ion-row>
+      <ion-col class="fullWidth">
+      </ion-col>
+      <ion-col col-auto>
+          <button ion-button icon-only clear small type="button"
+          (click)="previousMonth()"><ion-icon name="arrow-back"></ion-icon></button>
+      </ion-col>
+      <ion-col col-4>
+        <h2 class="calendarTitle-small">{{parsedDates.monthName}}</h2>
+      </ion-col>
+      <ion-col col-auto>
+          <button ion-button icon-only clear small type="button" 
+          (click)="nextMonth()"><ion-icon name="arrow-forward"></ion-icon></button>
+      </ion-col>
+      <ion-col class="fullWidth">
+      </ion-col>
+    </ion-row>
+    
+    <ion-row class="calendar-small">
+      <ion-col *ngFor="let day of ['L','M','X','J','V','S','D'];">
+        <span>{{day}}</span>
+      </ion-col>
+    </ion-row>
+
+    <ion-row class="calendar-small" *ngFor="let week of parsedDates.week;">
+      <ion-col *ngFor="let wd of [1,2,3,4,5,6,0];">
+        <div *ngIf="week.day[wd] && ! isDisabled(week.day[wd]); else show_disabled_day" [ngClass]="isSelectedDay(week.day[wd].date)" class="day-small" id="day" name="day" (click)="assignDate(week.day[wd].date)"><span>{{week.day[wd].dayOfMonth}}</span></div>
+        <ng-template #show_disabled_day>
+            <div *ngIf="week.day[wd]" class="day-small day-disabled" id="day" name="day"><span>{{week.day[wd].dayOfMonth}}</span></div>
+        </ng-template>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ng-template>

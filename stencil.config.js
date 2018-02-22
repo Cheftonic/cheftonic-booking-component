@@ -1,10 +1,12 @@
+const sass = require('@stencil/sass');
+
 exports.config = {
   namespace: 'cheftonic-booking-component',
   generateDistribution: true,
-  generateWWW: false,
-  bundles: [
-    { components: ['cheftonic-booking-component'] }
-  ],
+  generateWWW: true,
+  plugins: [
+    sass()
+  ]
 };
 
 exports.devServer = {

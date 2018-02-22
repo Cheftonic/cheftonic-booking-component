@@ -1,6 +1,6 @@
 {
-  "name": "Stencil Starter",
-  "short_name": "Stencil",
+  "name": "Cheftonic booking",
+  "short_name": "CheftonicBooking",
   "start_url": "/",
   "display": "standalone",
   "icons": [{
