@@ -1,9 +1,8 @@
-import { Component, Prop, Listen } from '@stencil/core';
+import { Component, Prop, State, Listen } from '@stencil/core';
 import '@ionic/core';
 import { ApolloClientProvider, MasterDataProvider } from '../../providers/providers';
 import { MasterDataKeys } from '../../providers/master-data/master-data'
 import gql from 'graphql-tag';
-import { Observable } from 'rxjs/Observable';
 
 import { BookRequestInput, RestaurantBookingInfoQuery } from '../../__generated__';
 import { CalendarComponentConfig } from '../calendar/calendar';
@@ -99,9 +98,9 @@ export class MakeBookingComponent {
   services: Array<any>;
 
   // Decides what should be shown
-  showCalendar: Boolean = false;
-  showTime: Boolean = false;
-  showPax: Boolean = false;
+  @State() showCalendar: boolean = false;
+  @State() showTime: boolean = false;
+  @State() showPax: boolean = false;
 
   // Map representing the hours opened per day for a given restaurant, depending on the services
   openHoursPerDay: Map<string, DayHours>;
@@ -181,16 +180,14 @@ export class MakeBookingComponent {
     return in1HourAnd30Minutes;
   }
 
-  private setCalendarConfigFromDate (initialDay: Date) {
+  private async setCalendarConfigFromDate (initialDay: Date) {
     // Check if it's the current month, in which case it will start in 1hour 30 mins
     initialDay = (initialDay.getMonth() === new Date().getMonth()) ? this.in1Hour30Minutes() : initialDay;
 
-    this.getDisabledDaysInMonth(initialDay)
-    .subscribe ((disabledDaysInMonth) => {
       this.calendarConfig = {
         bigCalendar: false,
         weekdaysEnabled: this.opening.open_weekdays,
-        disabledDays: disabledDaysInMonth,
+        disabledDays: await this.getDisabledDaysInMonth(initialDay),
         multiSelection: false,
         todayTomorrow: false,
         dateFrom: initialDay
@@ -199,28 +196,26 @@ export class MakeBookingComponent {
       // Don't display the hourMinute component until some day is selected
       this.hourMinuteConfig = null;
       this.showHourMinute = false;
-    });
   }
 
-  private setHourMinuteConfigForDate (date: Date) {
-    this.getOpeningHoursForDay (date)
-    .subscribe (dayHours => {
-      this.hourMinuteConfig = {
-        bigHourMinute: false,
-        interval: MinutesInterval.HALF,
-        hourHeaderTranslateKey: 'BOOKING_COMPONENT.HOUR_TITLE',
-        minuteHeaderTranslateKey: 'BOOKING_COMPONENT.MINUTE_TITLE'
-      };
-      if (dayHours.hours.length > 0) {
-        const hoursArray = dayHours.hours.sort((a, b) => a - b).map (h => '0'.concat(h.toString()).slice(-2));
-        this.hourMinuteConfig.initialValue = hoursArray[0].concat (':00');
-        this.hourMinuteConfig.hoursToShow = hoursArray;
-      } else {
-        // This means that there are no available hours
-        this.hourMinuteConfig.hoursToShow = [];
-      }
-      this.showHourMinute = true;
-    });
+  private async setHourMinuteConfigForDate (date: Date) {
+    const dayHours = await this.getOpeningHoursForDay (date);
+    
+    this.hourMinuteConfig = {
+      bigHourMinute: false,
+      interval: MinutesInterval.HALF,
+      hourHeaderTranslateKey: 'BOOKING_COMPONENT.HOUR_TITLE',
+      minuteHeaderTranslateKey: 'BOOKING_COMPONENT.MINUTE_TITLE'
+    };
+    if (dayHours.hours.length > 0) {
+      const hoursArray = dayHours.hours.sort((a, b) => a - b).map (h => '0'.concat(h.toString()).slice(-2));
+      this.hourMinuteConfig.initialValue = hoursArray[0].concat (':00');
+      this.hourMinuteConfig.hoursToShow = hoursArray;
+    } else {
+      // This means that there are no available hours
+      this.hourMinuteConfig.hoursToShow = [];
+    }
+    this.showHourMinute = true;
   }
 
   /*
@@ -252,7 +247,7 @@ export class MakeBookingComponent {
    * It should cache the already computed days in a map with the day as key.
    * @param day Day to be processed
    */
-  private getDisabledDaysInMonth (fromTimestamp: Date): Observable<Date[]> {
+  private async getDisabledDaysInMonth (fromTimestamp: Date): Promise<Date[]> {
     // 0. Get the remaining days of the month
     const nextMonth = new Date(fromTimestamp.valueOf());
     nextMonth.setMonth(nextMonth.getMonth() + 1);
@@ -263,15 +258,12 @@ export class MakeBookingComponent {
     /*
     First we need to get some master data, so we need to wrap everything in a subscription to masterdata's observable result
     */
-    return this._masterDataProvider.getMasterDataInfo(MasterDataKeys.WEEKDAYS)
-    .map (dowMD => {
-      // Iterate across all the days in that month, so for each day:
-      return daysInMonth.map (day => {
-        return this._getOpeningHoursForDay (day, dowMD);
-      })
-      .filter (dayHours => dayHours.hours.length === 0)
-      .map (dayHours => dayHours.day);
-    });
+   const dowMD = await this._masterDataProvider.getMasterDataInfo(MasterDataKeys.WEEKDAYS)
+
+  return daysInMonth
+    .map (day => this._getOpeningHoursForDay (day, dowMD))
+    .filter (dayHours => dayHours.hours.length === 0)
+    .map (dayHours => dayHours.day);
   }
 
   /**
@@ -279,13 +271,12 @@ export class MakeBookingComponent {
    * It should cache the already computed days in a map with the day as key.
    * @param day Day to be processed
    */
-  private getOpeningHoursForDay (day: Date): Observable<DayHours> {
+  private async getOpeningHoursForDay (day: Date): Promise<DayHours> {
     // But first we need to get some master data, so we need to wrap everything in a subscription to masterdata's observable result
 
-    return this._masterDataProvider.getMasterDataInfo(MasterDataKeys.WEEKDAYS)
-    .map (dowMD => {
-      return this._getOpeningHoursForDay (day, dowMD);
-    });
+    const dowMD = await this._masterDataProvider.getMasterDataInfo(MasterDataKeys.WEEKDAYS);
+
+    return this._getOpeningHoursForDay (day, dowMD);
   }
 
   /**
@@ -375,8 +366,8 @@ export class MakeBookingComponent {
     return res;
   }
 
-  setPax(numPax: number) {
-    this.bookingInfo.pax = numPax;
+  setPax(event) {
+    this.bookingInfo.pax = event.target.value;
     this.togglePaxShow();
   }
 
@@ -515,15 +506,15 @@ export class MakeBookingComponent {
           </ion-grid>
         </div>
 
-        {(this.showCalendar.valueOf()) ?
+        {(this.showCalendar) ?
           <div id='bookingCalContainer' style={{display: 'block'}}>
-            <p>I'M THE CALENDAR</p>
+            <span>I'M THE CALENDAR</span>
             {/* <calendar inputCalendarConfig="calendarConfig"></calendar> */}
           </div>
-          : <div></div>
+          : <div id='bookingCalContainer'></div>
         }
           
-        {(this.showTime.valueOf()) ?
+        {(this.showTime) ?
           <div id="bookingTimeContainer" style={{display: 'block'}}>
           <p>I'M THE HOUR</p>
             {/*<ion-grid>
@@ -539,16 +530,17 @@ export class MakeBookingComponent {
           :<div></div>
         }
       
-        {(this.showPax.valueOf()) ?
-          <div id="bookingPaxContainer" style={{display: 'none'}}>
+        {(this.showPax) ?
+          <div id="bookingPaxContainer" style={{display: 'block', top: '-290px'}}>
             <ion-grid>
               <ion-row>
                 <ion-col col-4 offset-8>
                     <div style={{height: '100px', overflow: 'auto'}}>
                         <ul class="paxList">
-                          {[1,2,3,4,5,6,7,8,9,10].map(paxNr => {
-                              <li class="item" onClick = {this.setPax.bind(this)}>{ paxNr } <ion-icon name="man"></ion-icon></li>
-                            })
+                          {[1,2,3,4,5,6,7,8,9,10].map(paxNr => 
+                              <li class="item" value={paxNr} onClick = {this.setPax.bind(this)}>{ paxNr } <ion-icon name="man"></ion-icon>
+                              </li>
+                            )
                           }
                         </ul>
                   </div>
@@ -562,7 +554,7 @@ export class MakeBookingComponent {
         <h3>Notas</h3>
         <ion-textarea placeholder="Introduzca aqui sus notas para la reserva."></ion-textarea>
 
-        // If the user doesn't have the phone in his profile, ask for it
+        {/* If the user doesn't have the phone in his profile, ask for it */}
         { (this.phone_required) ?
           <div>
             <h3><ion-icon name="call"></ion-icon> Teléfono</h3>

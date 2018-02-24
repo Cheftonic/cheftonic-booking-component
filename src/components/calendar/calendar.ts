@@ -90,16 +90,10 @@ export class CalendarComponent {
       this.weekdayIndex[6] = 'saturday';
   }
 
-  ngOnInit() {
-    this.masterData.getMasterDataInfo(MasterDataKeys.WEEKDAYS)
-    .subscribe (weekdays => {
-      this.weekdays = weekdays;
-      this.masterData.getMasterDataInfo(MasterDataKeys.MONTHS)
-      .subscribe (months => {
-        this.months = months;
-        this.initCalendar();
-      });
-    });
+  async ngOnInit() {
+    this.weekdays = await this.masterData.getMasterDataInfo(MasterDataKeys.WEEKDAYS);
+    this.months = await this.masterData.getMasterDataInfo(MasterDataKeys.MONTHS);
+    this.initCalendar();
   }
 
   ngOnChanges (changes) {

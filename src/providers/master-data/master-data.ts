@@ -1,5 +1,3 @@
-import { Observable } from 'rxjs';
-
 import { ApolloClientProvider } from '../providers';
 import gql from 'graphql-tag';
 import { MasterDataQuery, MasterDataQueryVariables } from '../../__generated__';
@@ -26,20 +24,17 @@ export class MasterDataProvider {
     console.log('Hello MasterDataProvider Provider');
   }
 
-  public getMasterDataInfo (masterDataKey: MasterDataKeys): Observable<any> {
-    return  Observable.create(
-      this._apolloProvider.getApolloClient().watchQuery <MasterDataQuery>  ({
-        query: MasterData,
-        variables: <MasterDataQueryVariables> {
-          opt_id: masterDataKey,
-          lang: this.getLocale()
-        }
-      })
-      .result()
-      .then (({data}) => {
-          return JSON.parse(data.getMasterDataKey.value);
-      })
-    )
+  public getMasterDataInfo (masterDataKey: MasterDataKeys) {
+    return this._apolloProvider.getApolloClient().query <MasterDataQuery>  ({
+      query: MasterData,
+      variables: <MasterDataQueryVariables> {
+        opt_id: masterDataKey,
+        lang: this.getLocale()
+      }
+    })
+    .then (({data}) => {
+        return JSON.parse(data.getMasterDataKey.value);
+    })
   }
 
   private getLocale() {
