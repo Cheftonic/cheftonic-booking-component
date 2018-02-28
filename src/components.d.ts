@@ -3,76 +3,19 @@
  * It contains typing information for all components that exist in this project
  * and imports for stencil collections that might be configured in your stencil.config.js file
  */
-
-import '@ionic/core';
-
-
 declare global {
+  namespace JSX {
+    interface Element {}
+    export interface IntrinsicElements {}
+  }
+  namespace JSXElements {}
+
   interface HTMLStencilElement extends HTMLElement {
     componentOnReady(): Promise<this>;
     componentOnReady(done: (ele?: this) => void): void;
   }
-}
 
-
-
-import {
-  CalendarComponent as CheftonicCalendar
-} from './components/calendar/calendar';
-
-declare global {
-  interface HTMLCheftonicCalendarElement extends CheftonicCalendar, HTMLStencilElement {
-  }
-  var HTMLCheftonicCalendarElement: {
-    prototype: HTMLCheftonicCalendarElement;
-    new (): HTMLCheftonicCalendarElement;
-  };
-  interface HTMLElementTagNameMap {
-    "cheftonic-calendar": HTMLCheftonicCalendarElement;
-  }
-  interface ElementTagNameMap {
-    "cheftonic-calendar": HTMLCheftonicCalendarElement;
-  }
-  namespace JSX {
-    interface IntrinsicElements {
-      "cheftonic-calendar": JSXElements.CheftonicCalendarAttributes;
-    }
-  }
-  namespace JSXElements {
-    export interface CheftonicCalendarAttributes extends HTMLAttributes {
-      
-    }
-  }
-}
-
-
-import {
-  HourMinuteComponent as CheftonicHourMinute
-} from './components/hour-minute/hour-minute';
-
-declare global {
-  interface HTMLCheftonicHourMinuteElement extends CheftonicHourMinute, HTMLStencilElement {
-  }
-  var HTMLCheftonicHourMinuteElement: {
-    prototype: HTMLCheftonicHourMinuteElement;
-    new (): HTMLCheftonicHourMinuteElement;
-  };
-  interface HTMLElementTagNameMap {
-    "cheftonic-hour-minute": HTMLCheftonicHourMinuteElement;
-  }
-  interface ElementTagNameMap {
-    "cheftonic-hour-minute": HTMLCheftonicHourMinuteElement;
-  }
-  namespace JSX {
-    interface IntrinsicElements {
-      "cheftonic-hour-minute": JSXElements.CheftonicHourMinuteAttributes;
-    }
-  }
-  namespace JSXElements {
-    export interface CheftonicHourMinuteAttributes extends HTMLAttributes {
-      
-    }
-  }
+  interface HTMLAttributes {}
 }
 
 

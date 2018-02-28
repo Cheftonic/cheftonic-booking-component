@@ -1,12 +1,11 @@
-import { Component, Prop, State, Listen } from '@stencil/core';
-import '@ionic/core';
+import { Component, Prop, State } from '@stencil/core';
 import { ApolloClientProvider, MasterDataProvider } from '../../providers/providers';
 import { MasterDataKeys } from '../../providers/master-data/master-data'
 import gql from 'graphql-tag';
 
 import { BookRequestInput, RestaurantBookingInfoQuery } from '../../__generated__';
-import { CalendarComponentConfig } from '../calendar/calendar';
-import { HourMinuteComponentConfig, MinutesInterval } from '../hour-minute/hour-minute';
+import { Calendar, CalendarConfig } from './calendar';
+import { HourMinuteConfig, MinutesInterval, HourMinute } from './hour-minute';
 
 const RestaurantBookingInfo = gql`
 query RestaurantBookingInfo ($b_r_id: ID!) {
@@ -40,7 +39,7 @@ query RestaurantBookingInfo ($b_r_id: ID!) {
 }`;
 // createBookRequest (book_request: BookRequestInput!): BookRequest
 
-const CreateBookRequest = gql`
+/*const CreateBookRequest = gql`
 mutation BookRequest ($booking_info: BookRequestInput!) {
   createMyBookRequest (book_request: $booking_info) {
     book_id
@@ -51,38 +50,14 @@ mutation BookRequest ($booking_info: BookRequestInput!) {
     notes
   }
 }
-`;
-
-export class BookingInfo {
-  day: Date;
-  time: string;
-  pax: number;
-  notes: string;
-  phone: string;
-  phoneChanged: boolean;
-  service: string;
-}
-
-interface DayHours {
-  day: Date;
-  hours: Array<number>;
-}
-
-enum BookingStates {
-  not_submitted = 'NOT_SUBMITTED',
-  submitting = 'SUBMITTING',
-  submitted_ok = 'SUBMITTED_OK',
-  submitted_ko = 'SUBMITTED_KO',
-}
-
-const getCheftonicDate = (date: Date) => (date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate());
+`;*/
 
 /**
  * Read the README file to know about component's functionality
  */
 @Component({
   tag: 'make-booking',
-  styleUrl: 'make-booking.scss'
+  styleUrl: 'make-booking.css'
 })
 export class MakeBookingComponent {
   // The input object is the restaurant_id where the user wants to make the booking
@@ -102,12 +77,14 @@ export class MakeBookingComponent {
   @State() showTime: boolean = false;
   @State() showPax: boolean = false;
 
+  localLocale;
+
   // Map representing the hours opened per day for a given restaurant, depending on the services
   openHoursPerDay: Map<string, DayHours>;
 
   // These objects are used to configure the calendar and the hour-minute components respectively
-  calendarConfig: CalendarComponentConfig;
-  hourMinuteConfig: HourMinuteComponentConfig;
+  @State() calendarConfig: CalendarConfig;
+  hourMinuteConfig: HourMinuteConfig;
   showHourMinute: boolean;
 
   // States of the component
@@ -124,9 +101,41 @@ export class MakeBookingComponent {
   _apolloProvider: ApolloClientProvider;
   _masterDataProvider: MasterDataProvider;
 
+  // Selectors
+  _daySelector: Calendar;
+  _timeSelector: HourMinute;
+
   constructor() {
     this._apolloProvider = new ApolloClientProvider();
     this._masterDataProvider = new MasterDataProvider(this._apolloProvider);
+    
+    this._daySelector = new Calendar(this._masterDataProvider, 
+      async (param) => {
+        const selectedDay = param.pop();
+        this.bookingInfo.day = selectedDay;
+        await this.setHourMinuteConfigForDate (selectedDay);
+        await this._timeSelector.setConfig (this.hourMinuteConfig);
+        this.toggleCalendarShow();
+        console.log ('MAKE-BOOKING SELECT DAY - ' + this.bookingInfo.day);
+      }
+      , async (param) => {
+      console.log ('MAKE-BOOKING MONTH CHANGE - ' + param.toISOString());
+      await this.setCalendarConfigFromDate(param);
+      await this._daySelector.setConfig (this.calendarConfig);
+
+      // Don't display the hourMinute component until some day is selected
+      this.hourMinuteConfig = null;
+      this.showHourMinute = false;
+    });
+    
+    this._timeSelector = new HourMinute((param) => {
+      this.bookingInfo.time = param;
+      const [hour, minutes] = param.split(':');
+      this.bookingInfo.day.setHours (+hour, +minutes, 0, 0);
+      this.toggleTimeShow();
+      console.log ('MAKE-BOOKING FULL TIME - ' + this.bookingInfo.day.toISOString());
+    });
+
     // Initialize default booking setup
     this.bookingInfo = new BookingInfo();
     this.bookingInfo.pax = 2;
@@ -142,35 +151,40 @@ export class MakeBookingComponent {
     this.restaurant_status = this.not_loaded;
   }
 
-  componentWillLoad() {
+  async componentWillLoad() {
     console.log ("Apollo client version: " + this._apolloProvider.getApolloClient().version);
-    this._apolloProvider.getApolloClient().query<RestaurantBookingInfoQuery> ({
+    const restQuery = await this._apolloProvider.getApolloClient().query<RestaurantBookingInfoQuery> ({
       query: RestaurantBookingInfo,
       variables: {
         b_r_id: this.restid
       }
     })
-    .then (({data}) => {
-      console.log ("Restaurant info retrieved: " + JSON.stringify(data, null, 2));
-      if (data.getRestaurantById.opening && data.getRestaurantById.services && data.getRestaurantById.services.length > 0) {
-        // Fetch the data
-        this.opening = data.getRestaurantById.opening;
-        this.services = data.getRestaurantById.services;
-        this.openHoursPerDay = new Map<string, DayHours>();
+    const restData = restQuery.data;
+    // console.log ("Restaurant info retrieved: " + JSON.stringify(data, null, 2));
+    if (restData.getRestaurantById.opening && restData.getRestaurantById.services && restData.getRestaurantById.services.length > 0) {
+      // Fetch the data
+      this.opening = restData.getRestaurantById.opening;
+      this.services = restData.getRestaurantById.services;
+      this.openHoursPerDay = new Map<string, DayHours>();
 
-        // The calendar should start 1h 30 mins ahead of current time
-        this.setCalendarConfigFromDate (this.in1Hour30Minutes());
+      // The calendar should start 1h 30 mins ahead of current time
+      await this.setCalendarConfigFromDate (this.in1Hour30Minutes());
+      
+      await this._daySelector.setConfig (this.calendarConfig);
 
-        // The restaurant is loaded and ready to receive bookings
-        this.restaurant_status = this.ok;
-      } else {
-        // There is no info about opening and/or services, mark it.
-        this.restaurant_status = this.info_pending;
-      }
-    }, ((error) => {
-      console.error ('[MakeBooking] Could not load info for rest_id: ' + this.restid + '. Error: ' + error);
-      this.restaurant_status = this.not_loaded;
-    }));
+      await this.setHourMinuteConfigForDate (this.in1Hour30Minutes());
+
+      const [hour, minutes] = this.hourMinuteConfig.initialValue.split(':');
+      this.bookingInfo.day.setHours (+hour, +minutes, 0, 0);
+      
+      await this._timeSelector.setConfig (this.hourMinuteConfig);
+      
+      // The restaurant is loaded and ready to receive bookings
+      this.restaurant_status = this.ok;
+    } else {
+      // There is no info about opening and/or services, mark it.
+      this.restaurant_status = this.info_pending;
+    }
   }
 
   private in1Hour30Minutes(): Date {
@@ -185,9 +199,8 @@ export class MakeBookingComponent {
     initialDay = (initialDay.getMonth() === new Date().getMonth()) ? this.in1Hour30Minutes() : initialDay;
 
       this.calendarConfig = {
-        bigCalendar: false,
         weekdaysEnabled: this.opening.open_weekdays,
-        disabledDays: await this.getDisabledDaysInMonth(initialDay),
+        disabledDays: [], // await this.getDisabledDaysInMonth(initialDay),
         multiSelection: false,
         todayTomorrow: false,
         dateFrom: initialDay
@@ -201,69 +214,24 @@ export class MakeBookingComponent {
   private async setHourMinuteConfigForDate (date: Date) {
     const dayHours = await this.getOpeningHoursForDay (date);
     
-    this.hourMinuteConfig = {
-      bigHourMinute: false,
+    let newHourMinuteConfig:HourMinuteConfig = {
       interval: MinutesInterval.HALF,
       hourHeaderTranslateKey: 'BOOKING_COMPONENT.HOUR_TITLE',
       minuteHeaderTranslateKey: 'BOOKING_COMPONENT.MINUTE_TITLE'
     };
     if (dayHours.hours.length > 0) {
       const hoursArray = dayHours.hours.sort((a, b) => a - b).map (h => '0'.concat(h.toString()).slice(-2));
-      this.hourMinuteConfig.initialValue = hoursArray[0].concat (':00');
-      this.hourMinuteConfig.hoursToShow = hoursArray;
+      newHourMinuteConfig.initialValue = hoursArray[0].concat (':00');
+      newHourMinuteConfig.hoursToShow = hoursArray;
     } else {
       // This means that there are no available hours
       this.hourMinuteConfig.hoursToShow = [];
     }
+
+    this.bookingInfo.time = newHourMinuteConfig.initialValue;
+    this.hourMinuteConfig = newHourMinuteConfig;
+
     this.showHourMinute = true;
-  }
-
-  /*
-  HourMinuteComponentConfig {
-    initialValue?: string,
-    from? : string,
-    to? : string,
-    interval? : MinutesInterval,
-    showAllHours? : Boolean,
-    hourHeaderTranslateKey : string,
-    minuteHeaderTranslateKey : string
-  }
-*/
-
- private getDates(startDate: Date, stopDate: Date): Array<Date> {
-  const dateArray = new Array<Date>();
-  let currentDate = startDate;
-  while (currentDate.getTime() <= stopDate.getTime()) {
-      dateArray.push(new Date (currentDate));
-      currentDate = new Date(currentDate.valueOf());
-      currentDate.setDate(currentDate.getDate() + 1);
-      currentDate.setHours (12, 0, 0, 0);
-  }
-  return dateArray;
-}
-
-  /**
-   * Given a certain day, gives back the available hours for that day.
-   * It should cache the already computed days in a map with the day as key.
-   * @param day Day to be processed
-   */
-  private async getDisabledDaysInMonth (fromTimestamp: Date): Promise<Date[]> {
-    // 0. Get the remaining days of the month
-    const nextMonth = new Date(fromTimestamp.valueOf());
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    const lastDayInMonth: Date = new Date (nextMonth.getFullYear(), nextMonth.getMonth(), 0);
-
-    const daysInMonth: Array<Date> = this.getDates (fromTimestamp, lastDayInMonth);
-
-    /*
-    First we need to get some master data, so we need to wrap everything in a subscription to masterdata's observable result
-    */
-   const dowMD = await this._masterDataProvider.getMasterDataInfo(MasterDataKeys.WEEKDAYS)
-
-  return daysInMonth
-    .map (day => this._getOpeningHoursForDay (day, dowMD))
-    .filter (dayHours => dayHours.hours.length === 0)
-    .map (dayHours => dayHours.day);
   }
 
   /**
@@ -371,25 +339,6 @@ export class MakeBookingComponent {
     this.togglePaxShow();
   }
 
-  @Listen('monthChange')
-  monthChangeHandler(event: CustomEvent) {
-    console.log('Received the custom monthChange event: ', event.detail);
-  }
-
-  /**
-   * Computes the enabled and disabled days of the month beign displayed
-   * @param firstDoM First day of the month beign diaplayed
-   */
-  onMonthChange (firstDoM: Date) {
-    this.setCalendarConfigFromDate(firstDoM);
-
-    // Don't display the hourMinute component until some day is selected
-    this.hourMinuteConfig = null;
-    this.showHourMinute = false;
-
-    console.log ('MAKE-BOOKING MONTH CHANGE - ' + firstDoM.toISOString());
-  }
-
   toggleCalendarShow() {
     this.showCalendar = !this.showCalendar;
   }
@@ -400,32 +349,6 @@ export class MakeBookingComponent {
 
   togglePaxShow() {
     this.showPax = !this.showPax;
-  }
-
-  @Listen('calendarChange')
-  calendarChangeHandler(event: CustomEvent) {
-    console.log('Received the custom calendarChange event: ', event.detail);
-  }
-
-  onCalendarChange (days: Array<Date>) {
-    const selectedDay = days.pop();
-    this.bookingInfo.day = selectedDay;
-    this.setHourMinuteConfigForDate (selectedDay);
-    this.toggleCalendarShow();
-    console.log ('MAKE-BOOKING DAY - ' + this.bookingInfo.day);
-  }
-
-  @Listen('hourMinuteChange')
-  hourMinuteChangeHandler(event: CustomEvent) {
-    console.log('Received the custom hourMinuteChange event: ', event.detail);
-  }
-  
-  onHourMinuteChange (time: string) {
-    this.bookingInfo.time = time;
-    const [hour, minutes] = time.split(':');
-    this.bookingInfo.day.setHours (+hour, +minutes, 0, 0);
-    this.toggleTimeShow();
-    console.log ('MAKE-BOOKING FULL TIME - ' + this.bookingInfo.day.toISOString());
   }
 
   onPhoneChange() {
@@ -451,7 +374,9 @@ export class MakeBookingComponent {
         service: this.services.find ((service) => (bookHour >= service.starts_at && bookHour < service.ends_at)).rs_id
       };
 
-      this._apolloProvider.getApolloClient().mutate<BookRequestInput> ({
+      console.log ('Submitting booking info: ' + JSON.stringify(bookRequestInput,null,2));
+
+      /*this._apolloProvider.getApolloClient().mutate<BookRequestInput> ({
         mutation: CreateBookRequest,
         variables: {
           booking_info: bookRequestInput
@@ -463,109 +388,115 @@ export class MakeBookingComponent {
       }, error => {
         this.booking_state = BookingStates.submitted_ko;
         console.log ('Booking submitted with errors: ' + error);
-      });
+      });*/
     }
   }
 
-  getMainBar() {
-    return (
-      <div>
-        <ion-grid>
-            <ion-row align-items-center justify-content-center>
-              <ion-col col-4 class="submitBookingCol" onClick = {this.toggleCalendarShow.bind(this)}>
-                <label class="bookingBar-Date">{ this.bookingInfo.day }<ion-icon name="md-arrow-dropdown"></ion-icon></label>
-              </ion-col>
-              <ion-col col-4 class="submitBookingCol" onClick = {this.toggleTimeShow.bind(this)}>
-                <label class="bookingBar-Time">{ this.bookingInfo.time }<ion-icon name="md-arrow-dropdown"></ion-icon></label>
-              </ion-col>
-              <ion-col col-4 class="submitBookingCol" onClick = {this.togglePaxShow.bind(this)}>
-                <span>{ this.bookingInfo.pax }</span><ion-icon name="man"></ion-icon>
-              </ion-col>
-            </ion-row>
-        </ion-grid>
-      </div>
-    )
+  handlePhoneChange(event) {
+    this.bookingInfo.phone = event.target.value;
+    if (event.target.validity.typeMismatch) {
+      console.log('this element is not valid')
+    }
+  }
+
+  handleEmailChange(event) {
+    this.bookingInfo.email = event.target.value;
+  }
+
+  handleNotesChange(event) {
+    this.bookingInfo.notes = event.target.value;
   }
 
   render () {
     return (
       <div>
-        <div>
-          <ion-grid>
-              <ion-row align-items-center justify-content-center>
-                <ion-col col-4 class="submitBookingCol" onClick = {this.toggleCalendarShow.bind(this)}>
-                  <label class="bookingBar-Date">{ this.bookingInfo.day }<ion-icon name="md-arrow-dropdown"></ion-icon></label>
-                </ion-col>
-                <ion-col col-4 class="submitBookingCol" onClick = {this.toggleTimeShow.bind(this)}>
-                  <label class="bookingBar-Time">{ this.bookingInfo.time }<ion-icon name="md-arrow-dropdown"></ion-icon></label>
-                </ion-col>
-                <ion-col col-4 class="submitBookingCol" onClick = {this.togglePaxShow.bind(this)}>
-                  <span>{ this.bookingInfo.pax }</span><ion-icon name="man"></ion-icon>
-                </ion-col>
-              </ion-row>
-          </ion-grid>
-        </div>
-
-        {(this.showCalendar) ?
-          <div id='bookingCalContainer' style={{display: 'block'}}>
-            <span>I'M THE CALENDAR</span>
-            {/* <calendar inputCalendarConfig="calendarConfig"></calendar> */}
+        <div class="cheftonic-booking-container">
+          <div class="submit-booking-col" onClick = {this.toggleCalendarShow.bind(this)}>
+              <label class="booking-bar-date">{ this.bookingInfo.day.toDateString() }</label>
           </div>
-          : <div id='bookingCalContainer'></div>
+          <div class="submit-booking-col" onClick = {this.toggleTimeShow.bind(this)}>
+            <label class="booking-bar-Time">{ this.bookingInfo.time }</label>
+          </div>
+          <div class="submit-booking-col" onClick = {this.togglePaxShow.bind(this)}>
+            <span>{ this.bookingInfo.pax }</span>
+          </div>
+        </div>
+        
+        {(this.showCalendar) ?
+          <div id="booking-cal-container">
+            { this._daySelector.renderCalendar() }
+          </div>
+          : <div></div>
         }
           
         {(this.showTime) ?
-          <div id="bookingTimeContainer" style={{display: 'block'}}>
-          <p>I'M THE HOUR</p>
-            {/*<ion-grid>
-              <ion-row>
-                <ion-col col-4 offset-4>
-                    <div style={{height: '100px', overflow: 'auto'}}>
-                      <hour-minute hourMinuteConfig="hourMinuteConfig"></hour-minute>
-                  </div>
-                </ion-col>
-              </ion-row>
-            </ion-grid>*/}
+          <div id="booking-time-container" style={{display: 'block'}}>
+            { this._timeSelector.renderHourMinute() }
           </div>
           :<div></div>
         }
       
         {(this.showPax) ?
-          <div id="bookingPaxContainer" style={{display: 'block', top: '-290px'}}>
-            <ion-grid>
-              <ion-row>
-                <ion-col col-4 offset-8>
-                    <div style={{height: '100px', overflow: 'auto'}}>
-                        <ul class="paxList">
-                          {[1,2,3,4,5,6,7,8,9,10].map(paxNr => 
-                              <li class="item" value={paxNr} onClick = {this.setPax.bind(this)}>{ paxNr } <ion-icon name="man"></ion-icon>
-                              </li>
-                            )
-                          }
-                        </ul>
-                  </div>
-                </ion-col>
-              </ion-row>
-            </ion-grid>
+          <div id="booking-pax-container" style={{display: 'block', top: '-290px'}}>
+            <div style={{height: '100px', overflow: 'auto'}}>
+              <ul class="pax-list">
+                {[1,2,3,4,5,6,7,8,9,10].map(paxNr => 
+                    <li class="item" value={paxNr} onClick = {this.setPax.bind(this)}>
+                      { paxNr }
+                    </li>
+                  )
+                }
+              </ul>
+            </div>
           </div>
           : <div></div>
         }
 
-        <h3>Notas</h3>
-        <ion-textarea placeholder="Introduzca aqui sus notas para la reserva."></ion-textarea>
+        <form onSubmit={() => this.submitBooking()}>
 
-        {/* If the user doesn't have the phone in his profile, ask for it */}
-        { (this.phone_required) ?
-          <div>
-            <h3><ion-icon name="call"></ion-icon> Teléfono</h3>
-            <input required type="number" onChange={this.onPhoneChange.bind(this)}></input>
-          </div>
-          : <div></div>
-        }
-        
-        <button ion-button type="button" onClick = {this.submitBooking.bind(this)}>Reservar ahora</button>
+        <label>
+            Teléfono:
+            <input type="number" value={this.bookingInfo.phone} onInput={(e) => this.handlePhoneChange(e)} pattern="/^[0-9]{9,9}$/" placeholder="654321123"/>
+          </label>
+
+          <label>
+            Email:
+            <input type="email" value={this.bookingInfo.email} onInput={(e) => this.handleEmailChange(e)} placeholder="you@somewhere.something"/>
+          </label>
+
+          <label>
+            Solicitud particular
+            <input type="text" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui ti tiene alguna solicitud particular."/>
+          </label>
+          
+          <input type="submit" value="Reservar"/>
+        </form>
       </div>
     )
   }
 }
 
+export class BookingInfo {
+  day: Date;
+  time: string;
+  pax: number;
+  notes: string;
+  phone: string;
+  email: string;
+  phoneChanged: boolean;
+  service: string;
+}
+
+interface DayHours {
+  day: Date;
+  hours: Array<number>;
+}
+
+enum BookingStates {
+  not_submitted = 'NOT_SUBMITTED',
+  submitting = 'SUBMITTING',
+  submitted_ok = 'SUBMITTED_OK',
+  submitted_ko = 'SUBMITTED_KO',
+}
+
+const getCheftonicDate = (date: Date) => (date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate());

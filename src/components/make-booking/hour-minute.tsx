@@ -1,4 +1,3 @@
-import { Component} from '@stencil/core';
 
 /**
  * Interface to configure this component
@@ -7,8 +6,7 @@ import { Component} from '@stencil/core';
  * hoursToShow: Pre-filled array with the hours to show. If set, the next parameters are ignored.
  * from, to, showAllHours: If showAllHours is false, the component will only show the hours between from and to. If showAllHours is true, it will show 24 hours.
  */
-export interface HourMinuteComponentConfig {
-  bigHourMinute: boolean;
+export interface HourMinuteConfig {
   initialValue?: string;
   from?: string;
   to?: string;
@@ -25,14 +23,9 @@ export enum MinutesInterval {
   FULL
 }
 
-@Component({
-  tag: 'cheftonic-hour-minute',
-  styleUrl: 'hour-minute.scss'
-})
+export class HourMinute {
 
-export class HourMinuteComponent {
-
-  hourMinuteConfig: HourMinuteComponentConfig;
+  hourMinuteConfig: HourMinuteConfig;
   OonHourMinuteChange;// = new EventEmitter<string>();
 
   public hours: Array<string>;
@@ -42,8 +35,7 @@ export class HourMinuteComponent {
   public selectedHour: string;
   public selectedMinute: string;
 
-  private defaultHourMinuteConfig: HourMinuteComponentConfig = {
-    bigHourMinute: false,
+  private defaultHourMinuteConfig: HourMinuteConfig = {
     initialValue : '08:00',
     from : '00:00',
     to : '23:00',
@@ -53,18 +45,13 @@ export class HourMinuteComponent {
     minuteHeaderTranslateKey : ''
   };
 
-  constructor() {
+  constructor (public onSelectTime: Function) {}
+
+  async setConfig (hourMinuteConfig:HourMinuteConfig) {
+    if (hourMinuteConfig) {
+      this.hourMinuteConfig = hourMinuteConfig;
+      this.initHourMinute();
     }
-
-  ngOnInit() {
-    this.initHourMinute();
-  }
-
-  ngOnChanges (changes) {
-    console.log ('changed this: ' + JSON.stringify(changes, null, 2));
-    this.hourMinuteConfig = <HourMinuteComponentConfig> changes.hourMinuteConfig.currentValue;
-
-    this.initHourMinute();
   }
 
   initHourMinute() {
@@ -82,6 +69,7 @@ export class HourMinuteComponent {
         this.minutes = ['00'];
         break;
     }
+    console.log ('Computed configuration: ' + this.hourMinuteConfig )
 
     this.selectedHour = this.hourMinuteConfig.initialValue.split(':')[0];
     this.selectedMinute = this.hourMinuteConfig.initialValue.split(':')[1];
@@ -92,13 +80,13 @@ export class HourMinuteComponent {
     } else {
       this.fillHours();
     }
+    console.log ('Hours to show: ' + this.hours)
 
-    // If the smal version is required, we have to populate all the available times
-    if (! this.hourMinuteConfig.bigHourMinute) {
-      this.allTimes = this.hours.map ((hour) => this.minutes
-        .map((minute) => hour + ':' + minute))
-        .reduce((prev, act) =>  prev.concat(act), []);
-    }
+    // Populate all the available times
+    this.allTimes = this.hours.map ((hour) => this.minutes
+      .map((minute) => hour + ':' + minute))
+      .reduce((prev, act) =>  prev.concat(act), []);
+
   }
 
   fillHours() {
@@ -112,48 +100,23 @@ export class HourMinuteComponent {
     });
   }
 
-  setTime (time: string) {
-    [this.selectedHour, this.selectedMinute] = time.split(':');
-    this.emitTime();
+  setTime (event) {
+    console.log ('Time Selected: ' + event.target.textContent);
+    [this.selectedHour, this.selectedMinute] = event.target.textContent.split(':');
+    this.onSelectTime (event.target.textContent);
   }
 
-  setHour (hour: string) {
-    this.selectedHour = hour;
-    this.emitTime();
-  }
-
-  setMinute (minute: string) {
-    this.selectedMinute = minute;
-    this.emitTime();
-  }
-
-  emitTime() {
-    //this.onHourMinuteChange.emit(this.selectedHour + ':' + this.selectedMinute);
-  }
-
-  /*isValidHour(hour) {
-    if((Number(hour) < Number(this.hourMinuteConfig.from.split(':')[0])) || (Number(hour) > Number(this.hourMinuteConfig.to.split(':')[0]))){
-      return false
-    }
-    else{return true}
-  }*/
-
-  /*isValidMinute(minute) {
-    if((Number(minute) <= Number(this.hourMinuteConfig.from.split(':')[1])) && (this.selectedHour == this.hourMinuteConfig.from.split(':')[0]) ){
-      return true
-    }
-    else{return false}
-  }*/
-
-  // #################################### CSS FUNCTIONS ####################################
-
-  isSelectedHour(hour: string): string {
-    return (hour === this.selectedHour) ? 'selectedButton' : '';
-  }
-
-  isSelectedMinute(minute: string): string {
-    return (minute === this.selectedMinute) ? 'selectedButton' : '';
-
+  renderHourMinute() {
+    return (
+      <ul class="list">
+        { this.allTimes.map (time => 
+          <li value= {time} onClick={this.setTime.bind(this)} class="booking_time">
+            { time }
+          </li>
+        )}
+      
+  </ul>
+    )
   }
 
 }

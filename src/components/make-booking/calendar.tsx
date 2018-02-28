@@ -1,13 +1,10 @@
-import { Component } from '@stencil/core';
-
 import { MasterDataProvider } from '../../providers/providers';
 import { MasterDataKeys } from '../../providers/master-data/master-data';
 
 /**
  * dateFrom: Date - If set, means the first day that can be selected on this calendar, and the calendar goes from this day forward.
  */
-export interface CalendarComponentConfig {
-  bigCalendar?: Boolean;
+export class CalendarConfig {
   dateFrom?: Date;
   multiSelection?: Boolean;
   selectedDays?: Date[];
@@ -15,22 +12,6 @@ export interface CalendarComponentConfig {
   weekdaysEnabled?: string[];
   todayTomorrow?: Boolean;
 }
-
-/*class CalendarMonth {
-  monthNr: number
-  monthName: string
-  weeks: Array<CalendarWeek>
-  constructor() {
-    this.weeks = new Array<CalendarWeek>()
-  }
-}
-class CalendarWeek {
-  weekNumber: number
-  days: Array<CalendarDay>
-  constructor() {
-    this.days = new Array<CalendarDay>()
-  }
-}*/
 
 class CalendarDay {
   weekDayNr: number;
@@ -40,33 +21,21 @@ class CalendarDay {
   date: Date;
 }
 
-class TodayTomorrowDay extends CalendarDay {
-  monthName: string;
-}
+export class Calendar {
 
-@Component({
-  tag: 'cheftonic-calendar',
-  styleUrl: 'calendar.scss'
-})
-export class CalendarComponent {
-
-  inputCalendarConfig: CalendarComponentConfig = {};
-  onCalendarChange;// = new EventEmitter<Array<Date>>();
-  onMonthChange;// = new EventEmitter<Date>();
+  private inputCalendarConfig: CalendarConfig = {};
 
   public weekdays: Array<{key: string, value: string}>;
   public months: Array<{key: string, value: string}>;
 
   public parsedDates = {monthName: '', week: [{day: new Array<CalendarDay>()}]};
-  public parsedTodayTomorrow: Array<TodayTomorrowDay>;
   public today: Date = new Date();
   public selectedYear: number;
   public selectedMonth: number;
   public selected_dates: Set <string> = new Set <string>(); // ISO date string
   public disabled_dates: Set <string> = new Set <string>(); // ISO date string
   private weekdayIndex = new Array<string>(7);
-  public defaultCalendarConfig: CalendarComponentConfig = {
-    bigCalendar: true,
+  public defaultCalendarConfig: CalendarConfig = {
     dateFrom : this.today,
     disabledDays : [],
     multiSelection : true,
@@ -74,7 +43,9 @@ export class CalendarComponent {
   };
 
   constructor (
-    private masterData: MasterDataProvider) {
+    private masterData: MasterDataProvider,
+    public onSelectDay: Function,
+    public onMonthChange: Function) {
       // Reset today to noon
       this.today.setHours (12, 0, 0, 0);
       // Set current Date values
@@ -90,27 +61,32 @@ export class CalendarComponent {
       this.weekdayIndex[6] = 'saturday';
   }
 
-  async ngOnInit() {
-    this.weekdays = await this.masterData.getMasterDataInfo(MasterDataKeys.WEEKDAYS);
-    this.months = await this.masterData.getMasterDataInfo(MasterDataKeys.MONTHS);
-    this.initCalendar();
+  private async getCalendarMD () {
+    return Promise.all ([
+      this.masterData.getMasterDataInfo(MasterDataKeys.WEEKDAYS),
+      this.masterData.getMasterDataInfo(MasterDataKeys.MONTHS)
+    ])
   }
-
-  ngOnChanges (changes) {
-    console.log ('changed this: ' + JSON.stringify(changes, null, 2));
-    this.defaultCalendarConfig = <CalendarComponentConfig> changes.inputCalendarConfig.currentValue;
+  async setConfig (calConfig: CalendarConfig) {
+    console.log ('Setting calendar to this config: ' + JSON.stringify(calConfig, null, 2));
+    this.defaultCalendarConfig = calConfig;
+    if (!this.weekdays || !this.months) {
+      [this.weekdays, this.months] = await this.getCalendarMD();
+    }
     if (this.defaultCalendarConfig && this.weekdays && this.months) {
       // Save new values
       this.selectedMonth = this.defaultCalendarConfig.dateFrom.getMonth();
       this.selectedYear = this.defaultCalendarConfig.dateFrom.getFullYear();
       // Reset parsedDates and generate new dates
       this.parsedDates = {monthName: '', week: [{day: new Array<CalendarDay>()}]};
-      this.initCalendar();
+      await this.initCalendar();
     }
   }
 
-  initCalendar() {
+  async initCalendar() {
     this.defaultCalendarConfig = {...this.defaultCalendarConfig, ...this.inputCalendarConfig};
+
+    console.log ('Calendar effective config: ' + JSON.stringify (this.defaultCalendarConfig, null, 2));
 
     if (this.defaultCalendarConfig && this.defaultCalendarConfig.disabledDays) {
       this.disabled_dates = new Set(this.defaultCalendarConfig.disabledDays.map(day => {
@@ -127,41 +103,14 @@ export class CalendarComponent {
         }
       ));
     }
+
     this.generateDates();
-    if (this.defaultCalendarConfig.todayTomorrow) {
-      // Set today & tomorrow values
-      this.setTodayTomorrow();
-    }
   }
 
   // #################################### CALENDAR FUNCTIONS ####################################
 
   daysInMonth(month, year) {
     return new Date(year, month, 0).getDate();
-  }
-
-  setTodayTomorrow() {
-
-    const todayObj = new TodayTomorrowDay();
-    todayObj.weekDayNr = this.today.getDay();
-    todayObj.weekDayName = this.weekdays.find(i => i.key === this.weekdayIndex[this.today.getDay()]).value;
-    todayObj.monthNr = this.today.getMonth();
-    todayObj.monthName = this.months[this.today.getMonth()].value;
-    todayObj.dayOfMonth = this.today.getDate();
-    todayObj.date = new Date(this.today);
-
-    const tomorrow = new Date(this.today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowObj = new TodayTomorrowDay();
-    tomorrowObj.weekDayNr = tomorrow.getDay();
-    tomorrowObj.weekDayName = this.weekdays.find(i => i.key === this.weekdayIndex[tomorrow.getDay()]).value;
-    tomorrowObj.monthNr = tomorrow.getMonth();
-    tomorrowObj.monthName = this.months[tomorrow.getMonth()].value;
-    tomorrowObj.dayOfMonth = tomorrow.getDate();
-    tomorrowObj.date = new Date(tomorrow);
-
-    this.parsedTodayTomorrow = new Array<TodayTomorrowDay>();
-    this.parsedTodayTomorrow.push(todayObj, tomorrowObj);
   }
 
   generateDates() {
@@ -194,7 +143,8 @@ export class CalendarComponent {
     console.log(this.parsedDates);
   }
 
-  previousMonth() {
+  previousMonth(event) {
+    console.log (event)
     /*
     The back button is enabled by default, and checks if it can go backwards in every click
     */
@@ -203,16 +153,17 @@ export class CalendarComponent {
       // Go to previous month
       date.setMonth(date.getMonth() - 1);
       // Emit the change
-      this.onMonthChange.emit (date);
+      this.onMonthChange (date);
     }
   }
 
-  nextMonth() {
+  nextMonth(event) {
+    console.log (event)
     const date = new Date(this.selectedYear, this.selectedMonth, 1);
     // Go to next month
     date.setMonth(date.getMonth() + 1);
     // Emit the change
-    this.onMonthChange.emit (date);
+    this.onMonthChange (date);
   }
 
   isBackAllowed() {
@@ -232,7 +183,10 @@ export class CalendarComponent {
   }
   // #################################### SELECTED DATES FUNCTIONS ####################################
 
-  assignDate(date: Date) {
+  assignDate(event) {
+    
+    const date = new Date(event.target.id);
+    
     // Check if multiSelection is enabled
     if (!this.defaultCalendarConfig.multiSelection) {
       this.selected_dates.clear();
@@ -243,7 +197,7 @@ export class CalendarComponent {
     } else {
       this.selected_dates.delete(date.toISOString());
     }
-    this.onCalendarChange.emit(Array.from(this.selected_dates).map(d => new Date(d)));
+    this.onSelectDay (Array.from(this.selected_dates).map(d => new Date(d)));
   }
 
   // #################################### CSS FUNCTIONS ####################################
@@ -279,4 +233,67 @@ export class CalendarComponent {
     return Math.round((d1 - d0) / 8.64e7);
   }
 
+  renderCalendar() {
+    return (
+      <div class="calendar_box">
+        <div class="calendar_header">
+          <div class="calendar_month">{ this.parsedDates.monthName }</div>
+          <div class="calendar_year">{ this.selectedYear }</div>
+          <div class="calendar_nav--prev"><button type="button"
+              onClick = {this.previousMonth.bind(this)}>&lt;
+              </button></div>
+              <div class="calendar_nav--next"><button ion-button icon-only type="button"
+              onClick = {this.nextMonth.bind(this)}>&gt;
+              </button></div>
+        </div>
+        <table class="calendar_table">
+          <thead>
+            <tr>
+            { ['L','M','X','J','V','S','D'].map (day =>
+            <th class="calendar_weekday" scope="col">{ day }</th>
+            )}
+            </tr>
+          </thead>
+          <tbody>
+          {
+          this.parsedDates.week.map (week =>
+            <tr>
+              { [1,2,3,4,5,6,0].map (wd => this.printWeekDay (week, wd))}
+            </tr>
+          )
+        }
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  private printWeekDay(week, wd) {
+    if ((week.day[wd])  && ! this.isDisabled(week.day[wd])) {
+      return (
+        <td role="presentation">
+          <div class = {'day-small '.concat(this.isSelectedDay(week.day[wd].date))}  id={ week.day[wd].date } onClick = {this.assignDate.bind(this)}>
+            { week.day[wd].dayOfMonth }
+          </div>
+        </td>
+      )
+    } else {
+      if (week.day[wd]) {
+        return (
+          <td role="presentation">
+            <div class="day-small day-disabled" id="day">
+              <span>{ week.day[wd].dayOfMonth }</span>
+            </div>
+          </td>
+        )
+      } else {
+        return (
+          <td role="presentation">
+            <div class="day-small" id="day">
+            </div>
+          </td>
+        )
+      }
+    }
+  }
 }
