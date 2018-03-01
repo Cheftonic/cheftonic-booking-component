@@ -1,6 +1,5 @@
 import { Component, Prop, State } from '@stencil/core';
 import { ApolloClientProvider, MasterDataProvider } from '../../providers/providers';
-import { MasterDataKeys } from '../../providers/master-data/master-data'
 import gql from 'graphql-tag';
 
 import { BookRequestInput, RestaurantBookingInfoQuery } from '../../__generated__';
@@ -127,7 +126,7 @@ export class MakeBookingComponent {
 
   private isValidKey (key:string):boolean {
     const restIdRegexp = '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}.[0-9]{1,3}$'
-    console.log ('Validating key ['+key+']: ' + new RegExp(restIdRegexp).test(key));
+    // console.log ('Validating key ['+key+']: ' + new RegExp(restIdRegexp).test(key));
     return new RegExp(restIdRegexp).test(key);
   }
 
@@ -228,7 +227,7 @@ export class MakeBookingComponent {
   }
 
   private async setHourMinuteConfigForDate (date: Date) {
-    const dayHours = await this.getOpeningHoursForDay (date);
+    const dayHours = this._getOpeningHoursForDay (date);
 
     let newHourMinuteConfig:HourMinuteConfig = {
       interval: MinutesInterval.HALF,
@@ -254,27 +253,17 @@ export class MakeBookingComponent {
   }
 
   /**
+   * Wrapper of getOpeningHoursForDay to share code between getOpeningHoursForDay and getDisabledDaysInMonth methods
    * Given a certain day, gives back the available hours for that day.
    * It should cache the already computed days in a map with the day as key.
    * @param day Day to be processed
-   */
-  private async getOpeningHoursForDay (day: Date): Promise<DayHours> {
-    // But first we need to get some master data, so we need to wrap everything in a subscription to masterdata's observable result
-
-    const dowMD = await this._masterDataProvider.getMasterDataInfo(MasterDataKeys.WEEKDAYS);
-
-    return this._getOpeningHoursForDay (day, dowMD);
-  }
-
-  /**
-   * Wrapper of getOpeningHoursForDay to share code between getOpeningHoursForDay and getDisabledDaysInMonth methods
-   * @param day Day to be processed
    * @param dowMD Days of the week coming from the Master Data table
    */
-  private _getOpeningHoursForDay (day: Date, dowMD: any): DayHours {
+  private _getOpeningHoursForDay (day: Date): DayHours {
     // 1. Get the date in cheftonic format
     const cheftoDate: string = getCheftonicDate(day);
-
+    // console.log ('getOpeningHoursForDay for ' + cheftoDate)
+    
     // 1.1. Check if the day is already cached, and if so return the computed hours. First check if it's null
     if (this.openHoursPerDay.has(cheftoDate)) {
       // console.log ("getOpeningHoursForDay Returning: " + JSON.stringify (this.openHoursPerDay.get (cheftoDate), null, 2))
@@ -283,8 +272,8 @@ export class MakeBookingComponent {
 
     // 2. Check if it's in the closing_days array, if so, return an empty array
     if (this.opening.closing_days && this.opening.closing_days.includes (cheftoDate)) {
-      // console.log ("getOpeningHoursForDay Returning: " + JSON.stringify (<DayHours>{day: day, hours:[]}, null, 2))
       const dh:DayHours = {day: day, hours: []};
+      // console.log ("getOpeningHoursForDay Returning: " + JSON.stringify (dh, null, 2))
       return dh;
     }
 
@@ -294,15 +283,18 @@ export class MakeBookingComponent {
       b. Services active in that particular weekday. If open_weekdays is not present, it means that is available all days.
       c. If the selected day is the current day, check the start and end service time.
     */
-    const dow = dowMD[day.getDay()];
+
+    // const dow = dowMD[day.getDay()];
+    
     // Check if the restaurant is open that day of week
 
     const serviceHoursAvailable = this.services.map (svc => {
+      // console.log ("processing service: " + JSON.stringify (svc, null, 2));
       // (a.) Services that are allowed to be booked online
       // const bookOnlineFlag = (svc.booking_config.online_allowed) ? (svc.booking_config.online_allowed > 0) : true
       if (svc.booking_config.online_allowed) {
         // (b.) Services active in that particular weekday. If open_weekdays is not present, it means that is available all days.
-        const dayOfWeekFlag = (svc.open_weekdays) ? (svc.open_weekdays.includes(dow.key)) : true;
+        const dayOfWeekFlag = (svc.open_weekdays) ? (svc.open_weekdays.includes(day.toLocaleDateString('en', { weekday: 'long'}).toLowerCase())) : true;
         if (dayOfWeekFlag) {
           // First we do some common cases calculations to use them later
           const d = new Date();
@@ -311,6 +303,7 @@ export class MakeBookingComponent {
           const numOfHours = endHour - startHour;
 
           if (d.toDateString() === day.toDateString()) {
+            // console.log ("TODAY");
             // (c.) If the selected day is the current day, check the start and end service time.
             // Find the current date plus 1 hour and 30 minutes (default minimum delay is 1 hour for booking)
             const in1HourAnd30Minutes = new Date();
@@ -320,25 +313,34 @@ export class MakeBookingComponent {
 
             if (todaysHour <= startHour) {
               // The service hasn't started yet or it is starting, return all hours in the service
+              // const retVal = [...Array(numOfHours).keys()].map (x => x + startHour);
+              // console.log ("Returning: " + JSON.stringify(retVal,null,2));
               return [...Array(numOfHours).keys()].map (x => x + startHour);
             } else if (todaysHour >= endHour) {
               // The service has finished or is about to finish, return empty array
+              // console.log ("Returning empty: the service has finished");
               return [];
             } else {
               // The time is in between the service, get the hours remaining until it finishes
               const remainingHours = endHour - todaysHour;
+              // const retVal = [...Array(remainingHours).keys()].map (x => x + todaysHour);
+              // console.log ("Returning the remaining hours for this service: " + JSON.stringify(retVal,null,2));
               return [...Array(remainingHours).keys()].map (x => x + todaysHour);
             }
           } else {
             // It is not today, return all available hours for this service
+            // const retVal = [...Array(numOfHours).keys()].map (x => x + startHour);
+            // console.log ("Returning: " + JSON.stringify(retVal,null,2));
             return [...Array(numOfHours).keys()].map (x => x + startHour);
           }
         } else {
           // dayOfWeekFlag false
+          // console.log ("Returning empty: dayOfWeekFlag false");
           return [];
         }
       } else {
         // bookOnlineFlag false
+        // console.log ("Returning empty: bookOnlineFlag false");
         return [];
       }
     })
@@ -349,6 +351,8 @@ export class MakeBookingComponent {
     const res:DayHours = {day: day, hours: serviceHoursAvailable};
     // put it on the map to cache it
     this.openHoursPerDay.set (cheftoDate, res);
+
+    // console.log ("FINAL RESULT: " + JSON.stringify(res,null,2));
 
     return res;
   }
@@ -444,7 +448,7 @@ export class MakeBookingComponent {
             <span>{ this.bookingInfo.pax }</span>
           </div>
           <div class="submit-booking-col" onClick = {this.toggleCalendarShow.bind(this)}>
-              <label class="booking-bar-date">{ this.bookingInfo.day.toDateString() }</label>
+              <label class="booking-bar-date">{ this.bookingInfo.day.toLocaleDateString(navigator.language, { year: 'numeric', month: 'short', day: 'numeric' }) }</label>
           </div>
           <div class="submit-booking-col" onClick = {this.toggleTimeShow.bind(this)}>
             <label class="booking-bar-Time">{ this.bookingInfo.time }</label>
