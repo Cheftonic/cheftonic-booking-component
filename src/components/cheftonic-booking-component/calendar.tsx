@@ -35,7 +35,7 @@ export class Calendar {
   public selected_dates: Set <string> = new Set <string>(); // ISO date string
   public disabled_dates: Set <string> = new Set <string>(); // ISO date string
   private weekdayIndex = new Array<string>(7);
-  public defaultCalendarConfig: CalendarConfig = {
+  public calendarConfig: CalendarConfig = {
     dateFrom : this.today,
     disabledDays : [],
     multiSelection : true,
@@ -70,14 +70,14 @@ export class Calendar {
   
   async setConfig (calConfig: CalendarConfig) {
     console.log ('Setting calendar to this config: ' + JSON.stringify(calConfig, null, 2));
-    this.defaultCalendarConfig = calConfig;
+    this.calendarConfig = calConfig;
     if (!this.weekdays || !this.months) {
       [this.weekdays, this.months] = await this.getCalendarMD();
     }
-    if (this.defaultCalendarConfig && this.weekdays && this.months) {
+    if (this.calendarConfig && this.weekdays && this.months) {
       // Save new values
-      this.selectedMonth = this.defaultCalendarConfig.dateFrom.getMonth();
-      this.selectedYear = this.defaultCalendarConfig.dateFrom.getFullYear();
+      this.selectedMonth = this.calendarConfig.dateFrom.getMonth();
+      this.selectedYear = this.calendarConfig.dateFrom.getFullYear();
       // Reset parsedDates and generate new dates
       this.parsedDates = {monthName: '', week: [{day: new Array<CalendarDay>()}]};
       
@@ -86,20 +86,20 @@ export class Calendar {
   }
 
   initCalendar() {
-    this.defaultCalendarConfig = {...this.defaultCalendarConfig, ...this.inputCalendarConfig};
+    this.calendarConfig = {...this.calendarConfig, ...this.inputCalendarConfig};
 
-    console.log ('Calendar effective config: ' + JSON.stringify (this.defaultCalendarConfig, null, 2));
+    console.log ('Calendar effective config: ' + JSON.stringify (this.calendarConfig, null, 2));
 
-    if (this.defaultCalendarConfig && this.defaultCalendarConfig.disabledDays) {
-      this.disabled_dates = new Set(this.defaultCalendarConfig.disabledDays.map(day => {
+    if (this.calendarConfig && this.calendarConfig.disabledDays) {
+      this.disabled_dates = new Set(this.calendarConfig.disabledDays.map(day => {
           day.setHours(12, 0, 0, 0);
           return day.toISOString();
         }
       ));
     }
 
-    if (this.defaultCalendarConfig && this.defaultCalendarConfig.selectedDays) {
-      this.selected_dates = new Set(this.defaultCalendarConfig.selectedDays.map(day => {
+    if (this.calendarConfig && this.calendarConfig.selectedDays) {
+      this.selected_dates = new Set(this.calendarConfig.selectedDays.map(day => {
           day.setHours(12, 0, 0, 0);
           return day.toISOString();
         }
@@ -174,7 +174,7 @@ export class Calendar {
      * 1. If the parameter dateFrom IS NOT SET, it is possible to go back and forth without restrictions
      * 2. If the parameter dateFrom IS SET, the user can go backwards ONLY if the month being displayed is greater than the current (consider years)
      */
-    return (this.defaultCalendarConfig.dateFrom) ?
+    return (this.calendarConfig.dateFrom) ?
     (this.getFirstDayOfMonth (this.selectedYear, this.selectedMonth) > this.getFirstDayOfMonth (this.today.getFullYear(), this.today.getMonth())) : true;
   }
 
@@ -190,7 +190,7 @@ export class Calendar {
     const date = new Date(event.target.id);
 
     // Check if multiSelection is enabled
-    if (!this.defaultCalendarConfig.multiSelection) {
+    if (!this.calendarConfig.multiSelection) {
       this.selected_dates.clear();
     }
     // Add selected date to selected dates
@@ -211,9 +211,9 @@ export class Calendar {
   isDisabled(calDay: CalendarDay): boolean {
     return this.disabled_dates.has(calDay.date.toISOString()) ||
       // Depends on the weekdays which are enabled or not
-      ((this.defaultCalendarConfig.weekdaysEnabled) ? (this.defaultCalendarConfig.weekdaysEnabled.indexOf(calDay.weekDayName) < 0) : false) ||
+      ((this.calendarConfig.weekdaysEnabled) ? (this.calendarConfig.weekdaysEnabled.indexOf(calDay.weekDayName) < 0) : false) ||
       // Depends on the dateFrom, if set, disable the past days from that day. If not set don't disable days from this parameter
-      ((this.defaultCalendarConfig.dateFrom) ? (this.differenceInDays (calDay.date, this.defaultCalendarConfig.dateFrom) > 0) :  false);
+      ((this.calendarConfig.dateFrom) ? (this.differenceInDays (calDay.date, this.calendarConfig.dateFrom) > 0) :  false);
   }
 
   /**
