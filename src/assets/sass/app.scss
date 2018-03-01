@@ -1,5 +1,8 @@
+.cheftonic-booking-wrapper {
+    margin: 10px;
+}
+
 .cheftonic-booking-container {
-  margin: 10px;
   display: grid;
   grid-template-areas: 'date date time time pax pax';
   grid-gap: 0;
@@ -9,7 +12,7 @@
     margin: 0;
     line-height: 1.43;
     font-size: 19px;
-    padding: 15px 5px;
+    padding: 10px 5px;
     cursor: pointer;
 
     &:hover {
@@ -268,4 +271,49 @@
       }
     }
   }
+}
+
+/* Customer details */
+.customer-details {
+  font-size: 16px;
+  .customer-contact {
+  }
+  label {
+    display: inline-block;
+    border:1px solid rgba(0,0,0,0.2);
+    border-top: 0;
+    line-height:50px;
+    width: 50%;
+    padding-left: 5px;
+    box-sizing: border-box;
+    &:first-child {
+      border-right:0;
+    }
+  }
+  .number {
+    width:50%;
+  }
+  .email {
+    width:50%;
+  }
+  .text {
+    width:100%;
+    border-bottom: 0;
+  }
+  input {
+    font-size: 16px;
+    border:0;
+    line-height:48px;
+  }
+}
+
+.button-submit {
+  border:0;
+  width:100%;
+  background: green;
+  color:white;
+  font-size:19px;
+  text-align: center;
+  padding:0 15px;
+  height:50px;
 }
