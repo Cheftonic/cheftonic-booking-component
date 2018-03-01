@@ -276,25 +276,57 @@
 /* Customer details */
 .customer-details {
   font-size: 16px;
-  .customer-contact {
-  }
-  label {
-    display: inline-block;
-    border:1px solid rgba(0,0,0,0.2);
-    border-top: 0;
-    line-height:50px;
-    width: 50%;
-    padding-left: 5px;
-    box-sizing: border-box;
-    &:first-child {
-      border-right:0;
+  .contact-details {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    list-style-type: none;
+    padding:0;
+    margin:0;
+    li {
+      border:1px solid rgba(0,0,0,0.2);
+      border-top: 0;
+      line-height:50px;
+      padding-left: 5px;
+      flex-grow: 1;
+      &:first-child {
+        border-right:0;
+      }
+      div {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      label {
+        padding-right:3px;
+      }
+      input {
+        flex-grow:2;
+        align-self:center;
+        /* Text alignment fix */
+        border-bottom: 1px solid white;
+      }
     }
   }
-  .number {
-    width:50%;
-  }
-  .email {
-    width:50%;
+  .special-requests {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-left: 5px;
+    border-left:1px solid rgba(0,0,0,0.2);
+    border-right:1px solid rgba(0,0,0,0.2);
+    label {
+      padding-right:3px;
+    }
+    input {
+      flex-grow:2;
+      align-self:center;
+      /* Text alignment fix */
+      border-bottom: 1px solid white;
+    }
   }
   .text {
     width:100%;
