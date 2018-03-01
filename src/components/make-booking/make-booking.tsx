@@ -108,8 +108,8 @@ export class MakeBookingComponent {
   constructor() {
     this._apolloProvider = new ApolloClientProvider();
     this._masterDataProvider = new MasterDataProvider(this._apolloProvider);
-    
-    this._daySelector = new Calendar(this._masterDataProvider, 
+
+    this._daySelector = new Calendar(this._masterDataProvider,
       async (param) => {
         const selectedDay = param.pop();
         this.bookingInfo.day = selectedDay;
@@ -127,7 +127,7 @@ export class MakeBookingComponent {
       this.hourMinuteConfig = null;
       this.showHourMinute = false;
     });
-    
+
     this._timeSelector = new HourMinute((param) => {
       this.bookingInfo.time = param;
       const [hour, minutes] = param.split(':');
@@ -169,16 +169,16 @@ export class MakeBookingComponent {
 
       // The calendar should start 1h 30 mins ahead of current time
       await this.setCalendarConfigFromDate (this.in1Hour30Minutes());
-      
+
       await this._daySelector.setConfig (this.calendarConfig);
 
       await this.setHourMinuteConfigForDate (this.in1Hour30Minutes());
 
       const [hour, minutes] = this.hourMinuteConfig.initialValue.split(':');
       this.bookingInfo.day.setHours (+hour, +minutes, 0, 0);
-      
+
       await this._timeSelector.setConfig (this.hourMinuteConfig);
-      
+
       // The restaurant is loaded and ready to receive bookings
       this.restaurant_status = this.ok;
     } else {
@@ -213,7 +213,7 @@ export class MakeBookingComponent {
 
   private async setHourMinuteConfigForDate (date: Date) {
     const dayHours = await this.getOpeningHoursForDay (date);
-    
+
     let newHourMinuteConfig:HourMinuteConfig = {
       interval: MinutesInterval.HALF,
       hourHeaderTranslateKey: 'BOOKING_COMPONENT.HOUR_TITLE',
@@ -411,36 +411,38 @@ export class MakeBookingComponent {
     return (
       <div>
         <div class="cheftonic-booking-container">
+          <div class="submit-booking-col" onClick = {this.togglePaxShow.bind(this)}>
+            <span>{ this.bookingInfo.pax }</span>
+          </div>
           <div class="submit-booking-col" onClick = {this.toggleCalendarShow.bind(this)}>
               <label class="booking-bar-date">{ this.bookingInfo.day.toDateString() }</label>
           </div>
           <div class="submit-booking-col" onClick = {this.toggleTimeShow.bind(this)}>
             <label class="booking-bar-Time">{ this.bookingInfo.time }</label>
           </div>
-          <div class="submit-booking-col" onClick = {this.togglePaxShow.bind(this)}>
-            <span>{ this.bookingInfo.pax }</span>
-          </div>
         </div>
-        
+
         {(this.showCalendar) ?
-          <div id="booking-cal-container">
+          <div id="booking-cal-container" class="calendar-container">
             { this._daySelector.renderCalendar() }
           </div>
           : <div></div>
         }
-          
+
         {(this.showTime) ?
-          <div id="booking-time-container" style={{display: 'block'}}>
-            { this._timeSelector.renderHourMinute() }
+          <div id="booking-time-container" class="time-container" style={{display: 'block'}}>
+            <div class="time_box">
+              { this._timeSelector.renderHourMinute() }
+            </div>
           </div>
           :<div></div>
         }
-      
+
         {(this.showPax) ?
-          <div id="booking-pax-container" style={{display: 'block', top: '-290px'}}>
-            <div style={{height: '100px', overflow: 'auto'}}>
+          <div id="booking-pax-container" class="people-container" style={{display: 'block'}}>
+            <div class="people_box">
               <ul class="pax-list">
-                {[1,2,3,4,5,6,7,8,9,10].map(paxNr => 
+                {[1,2,3,4,5,6,7,8,9,10].map(paxNr =>
                     <li class="item" value={paxNr} onClick = {this.setPax.bind(this)}>
                       { paxNr }
                     </li>
@@ -468,7 +470,7 @@ export class MakeBookingComponent {
             Solicitud particular
             <input type="text" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui ti tiene alguna solicitud particular."/>
           </label>
-          
+
           <input type="submit" value="Reservar"/>
         </form>
       </div>

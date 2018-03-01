@@ -1,0 +1,225 @@
+.cheftonic-booking-container {
+  margin: 10px;
+  display: grid;
+  grid-template-areas: 'date date time time pax pax';
+  grid-gap: 0;
+  position: relative;
+
+  > div {
+    margin: 0;
+    line-height: 1.43;
+    font-size: 1rem;
+    padding: 15px 5px;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(0,0,0,0.05);
+    }
+
+    label {
+      cursor: pointer;
+    }
+  }
+
+  .invalid-text {
+    border: 2px solid red;
+  }
+
+  .error-text {
+    font-size: medium;
+    margin: 0;
+    color: red;
+  }
+
+  .man-text {
+    font-size: 3rem;
+  }
+
+  .submit-booking-col {
+    border: thin solid lightgrey;
+    border-right: 0;
+
+    &:last-child {
+      border-right: thin solid lightgrey;
+    }
+  }
+
+  .submit-booking-button {
+    background-color: #00A97E;
+    color: white;
+  }
+
+  .pax-list {
+    padding: 0;
+    margin: 0;
+  }
+}
+
+
+/* PEOPLE STYLING */
+
+.people-container {
+  position: relative;
+}
+.people_box {
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  height: auto;
+  width: 100px;
+  margin: 0;
+  padding: 5px;
+  display: block;
+  background-color: white;
+  border: 1px solid lightgrey;
+  border-radius: 3px 3px 3px 3px;
+}
+
+
+
+/* CALENDAR STYLING */
+.calendar-container {
+  position: relative;
+}
+
+.calendar_box {
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  height: auto;
+  width: 300px;
+  margin: 0;
+  padding: 5px;
+  display: block;
+  background-color: white;
+  border: 1px solid lightgrey;
+  border-radius: 3px 3px 3px 3px;
+
+  .calendar_header {
+    .calendar_nav--prev {
+      width:25%;
+      float:left;
+    }
+    .calender_date {
+      .calendar_month {
+        font-size: 19px;
+        font-weight: bold;
+        width:50%;
+        float:left;
+      }
+      .calendar_year {
+        font-size: 14px;
+      }
+    }
+    .calendar_nav--next {
+      width:25%;
+      float:left;
+    }
+  }
+
+  .calendar_table {}
+
+  .selected-day {
+    background-color: orange;
+  }
+
+  .dayAndTime {
+    font-size: -webkit-xxx-large;
+    font-weight: bold;
+  }
+
+  .weekDay {
+    font-size: x-large;
+    font-weight: bold;
+  }
+
+  .month {
+    font-size: x-large;
+  }
+
+  .day {
+    width: 80%;
+    font-size: large;
+  }
+
+  .calendar {
+    text-align: center;
+  }
+
+  .calendarTitle {
+    text-align: center;
+    padding-top: 10px;
+  }
+
+  .calendarYear {
+    text-align: center;
+    padding-top: 3px;
+    font-size: medium;
+  }
+
+  .fullWidth {
+    width: 100%;
+  }
+
+  .date-small {
+    height: 90%;
+    width: 90%;
+    margin: 0;
+    padding: 1px;
+  }
+
+  .weekDay-small {
+    font-size: x-small;
+    font-weight: bold;
+  }
+
+  .month-small {
+    font-size: x-small;
+  }
+
+  .day-small {
+    width: 80%;
+    font-size: x-small;
+  }
+
+  .day-disabled {
+    background-color: whitesmoke;
+  }
+
+  .calendar-small {
+    text-align: center;
+    font-size: x-small;
+    font-weight: bold;
+  }
+
+  .calendarTitle-small {
+    text-align: center;
+    padding-top: 2px;
+  }
+
+  .calendarYear-small {
+    text-align: center;
+    padding-top: 1px;
+    font-size: small;
+  }
+}
+
+
+/* TIME STYLING */
+
+.time-container {
+  position: relative;
+}
+.time_box {
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  height: auto;
+  width: 100px;
+  margin: 0;
+  padding: 5px;
+  display: block;
+  background-color: white;
+  border: 1px solid lightgrey;
+  border-radius: 3px 3px 3px 3px;
+}
