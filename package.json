@@ -30,6 +30,7 @@
   "devDependencies": {
     "@stencil/dev-server": "latest",
     "@stencil/utils": "latest",
+    "@stencil/sass": "^0.0.3",
     "@types/jest": "^21.1.10",
     "apollo-codegen": "^0.18.3",
     "jest": "^21.2.1"
