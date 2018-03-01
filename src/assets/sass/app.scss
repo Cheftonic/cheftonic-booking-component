@@ -244,9 +244,28 @@
   height: auto;
   width: 100px;
   margin: 0;
-  padding: 5px;
+  padding: 0;
   display: block;
   background-color: white;
   border: 1px solid rgba(0,0,0,0.2);
   border-radius: 3px 3px 3px 3px;
+  .time-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    li {
+      height: 30px;
+      line-height: 30px;
+      padding: 5px;
+      margin: 0;
+      border-bottom: thin solid rgba(0,0,0,0.2);
+      cursor: pointer;
+      &:last-child {
+        border-bottom: 0;
+      }
+      &:hover {
+        background: rgba(0,0,0,0.05);
+      }
+    }
+  }
 }

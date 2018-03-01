@@ -247,7 +247,7 @@ export class Calendar {
           <div class="calendar_nav--next">
             <button ion-button icon-only type="button"
               onClick = {this.nextMonth.bind(this)}>&gt;
-              </button>
+            </button>
           </div>
         </div>
         <table class="calendar_table">

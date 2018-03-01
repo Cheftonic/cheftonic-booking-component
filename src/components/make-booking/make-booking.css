@@ -152,10 +152,25 @@
   height: auto;
   width: 100px;
   margin: 0;
-  padding: 5px;
+  padding: 0;
   display: block;
   background-color: white;
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 3px 3px 3px 3px; }
+  .time_box .time-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0; }
+    .time_box .time-list li {
+      height: 30px;
+      line-height: 30px;
+      padding: 5px;
+      margin: 0;
+      border-bottom: thin solid rgba(0, 0, 0, 0.2);
+      cursor: pointer; }
+      .time_box .time-list li:last-child {
+        border-bottom: 0; }
+      .time_box .time-list li:hover {
+        background: rgba(0, 0, 0, 0.05); }
 
 /*# sourceMappingURL=make-booking.css.map */
