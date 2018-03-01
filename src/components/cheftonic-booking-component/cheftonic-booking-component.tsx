@@ -417,6 +417,20 @@ export class MakeBookingComponent {
     }
   }
 
+  handleNameChange(event) {
+    this.bookingInfo.name = event.target.value;
+    if (event.target.validity.typeMismatch) {
+      console.log('this element is not valid')
+    }
+  }
+
+  handleSurnameChange(event) {
+    this.bookingInfo.surname = event.target.value;
+    if (event.target.validity.typeMismatch) {
+      console.log('this element is not valid')
+    }
+  }
+
   handlePhoneChange(event) {
     this.bookingInfo.phone = event.target.value;
     if (event.target.validity.typeMismatch) {
@@ -436,7 +450,7 @@ export class MakeBookingComponent {
     if (this.booking_state == BookingStates.invalid_id) {
       return (
         <div>
-          Your Cheftonic web component seems invalid. Please contact us to fix it to cdb@cheftonic.com. Please include this info: apikey = {this.apikey}
+          Your Cheftonic web component seems invalid. Please contact us to fix it at cdb@cheftonic.com. Please include this info: apikey = {this.apikey}
         </div>
       )
     }
@@ -483,6 +497,20 @@ export class MakeBookingComponent {
         }
 
         <form onSubmit={() => this.submitBooking()} class="customer-details">
+        <ul class="contact-details">
+            <li class="name">
+              <div>
+                <label htmlFor="name">Nombre</label>
+                <input type="text" id="name" value={this.bookingInfo.name} onInput={(e) => this.handleNameChange(e)} pattern="/[A-zÀ-ú ]{3,20}$/" placeholder="Alfonso"/>
+              </div>
+            </li>
+            <li class="surname">
+              <div>
+                <label htmlFor="surname">Apellido</label>
+                <input type="text" id="surname" value={this.bookingInfo.surname} onInput={(e) => this.handleSurnameChange(e)}  pattern="/[A-zÀ-ú ]{3,20}$/" placeholder="García"/>
+              </div>
+            </li>
+          </ul>
           <ul class="contact-details">
             <li class="phone-number">
               <div>
@@ -499,7 +527,7 @@ export class MakeBookingComponent {
           </ul>
           <div class="special-requests">
               <label htmlFor="special-requests">Solicitud particular</label>
-              <input type="text" id="special-requests" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui ti tiene alguna solicitud particular."/>
+              <input type="text" id="special-requests" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui si tiene alguna solicitud particular."/>
           </div>
           <input type="submit" class="button-submit" value="Reservar"/>
         </form>
@@ -515,6 +543,8 @@ export class BookingInfo {
   notes: string;
   phone: string;
   email: string;
+  name: string;
+  surname: string;
   phoneChanged: boolean;
   service: string;
 }
