@@ -229,7 +229,7 @@ export class MakeBookingComponent {
 
   private async setHourMinuteConfigForDate (date: Date) {
     const dayHours = await this.getOpeningHoursForDay (date);
-    
+
     let newHourMinuteConfig:HourMinuteConfig = {
       interval: MinutesInterval.HALF,
       hourHeaderTranslateKey: 'BOOKING_COMPONENT.HOUR_TITLE',
@@ -440,14 +440,14 @@ export class MakeBookingComponent {
       <div>
         {(this.booking_state == BookingStates.invalid_day) && <span style={{color: 'white', background: 'red'}}>El restaurante está cerrado hoy, por favor seleccione otra fecha.</span>}
         <div class="cheftonic-booking-container">
+          <div class="submit-booking-col" onClick = {this.togglePaxShow.bind(this)}>
+            <span>{ this.bookingInfo.pax }</span>
+          </div>
           <div class="submit-booking-col" onClick = {this.toggleCalendarShow.bind(this)}>
               <label class="booking-bar-date">{ this.bookingInfo.day.toDateString() }</label>
           </div>
           <div class="submit-booking-col" onClick = {this.toggleTimeShow.bind(this)}>
             <label class="booking-bar-Time">{ this.bookingInfo.time }</label>
-          </div>
-          <div class="submit-booking-col" onClick = {this.togglePaxShow.bind(this)}>
-            <span>{ this.bookingInfo.pax }</span>
           </div>
         </div>
         
@@ -467,7 +467,7 @@ export class MakeBookingComponent {
           <div id="booking-pax-container" style={{display: 'block', top: '-290px'}}>
             <div style={{height: '100px', overflow: 'auto'}}>
               <ul class="pax-list">
-                {[1,2,3,4,5,6,7,8,9,10].map(paxNr => 
+                {[1,2,3,4,5,6,7,8,9,10].map(paxNr =>
                     <li class="item" value={paxNr} onClick = {this.setPax.bind(this)}>
                       { paxNr }
                     </li>
@@ -494,7 +494,7 @@ export class MakeBookingComponent {
             Solicitud particular
             <input type="text" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui ti tiene alguna solicitud particular."/>
           </label>
-          
+
           <input type="submit" value="Reservar"/>
         </form>
       </div>

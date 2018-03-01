@@ -186,9 +186,9 @@ export class Calendar {
   // #################################### SELECTED DATES FUNCTIONS ####################################
 
   assignDate(event) {
-    
+
     const date = new Date(event.target.id);
-    
+
     // Check if multiSelection is enabled
     if (!this.defaultCalendarConfig.multiSelection) {
       this.selected_dates.clear();
@@ -239,14 +239,18 @@ export class Calendar {
     return (
       <div class="calendar_box">
         <div class="calendar_header">
+          <div class="calendar_nav--prev">
+            <button type="button"
+              onClick = {this.previousMonth.bind(this)}>&lt;
+            </button>
+          </div>
           <div class="calendar_month">{ this.parsedDates.monthName }</div>
           <div class="calendar_year">{ this.selectedYear }</div>
-          <div class="calendar_nav--prev"><button type="button"
-              onClick = {this.previousMonth.bind(this)}>&lt;
-              </button></div>
-              <div class="calendar_nav--next"><button ion-button icon-only type="button"
+          <div class="calendar_nav--next">
+            <button ion-button icon-only type="button"
               onClick = {this.nextMonth.bind(this)}>&gt;
-              </button></div>
+              </button>
+          </div>
         </div>
         <table class="calendar_table">
           <thead>
@@ -274,8 +278,8 @@ export class Calendar {
     if ((week.day[wd])  && ! this.isDisabled(week.day[wd])) {
       return (
         <td role="presentation">
-          <div class = {'day-small '.concat(this.isSelectedDay(week.day[wd].date))}  id={ week.day[wd].date } onClick = {this.assignDate.bind(this)}>
-            { week.day[wd].dayOfMonth }
+          <div class = {'day-small active'.concat(this.isSelectedDay(week.day[wd].date))}  id={ week.day[wd].date } onClick = {this.assignDate.bind(this)}>
+          { week.day[wd].dayOfMonth }
           </div>
         </td>
       )

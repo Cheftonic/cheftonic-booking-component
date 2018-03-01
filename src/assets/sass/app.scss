@@ -1,0 +1,236 @@
+.cheftonic-booking-container {
+  margin: 10px;
+  display: grid;
+  grid-template-areas: 'date date time time pax pax';
+  grid-gap: 0;
+  position: relative;
+
+  > div {
+    margin: 0;
+    line-height: 1.43;
+    font-size: 19px;
+    padding: 15px 5px;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(0,0,0,0.05);
+    }
+
+    label {
+      cursor: pointer;
+    }
+  }
+
+  .invalid-text {
+    border: 2px solid red;
+  }
+
+  .error-text {
+    font-size: medium;
+    margin: 0;
+    color: red;
+  }
+
+  .man-text {
+    font-size: 3rem;
+  }
+
+  .submit-booking-col {
+    border: thin solid lightgrey;
+    border-right: 0;
+
+    &:last-child {
+      border-right: thin solid lightgrey;
+    }
+  }
+
+  .submit-booking-button {
+    background-color: #00A97E;
+    color: white;
+  }
+
+  .pax-list {
+    padding: 0;
+    margin: 0;
+  }
+}
+
+
+/* PEOPLE STYLING */
+
+.people-container {
+  position: relative;
+}
+.people_box {
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  height: auto;
+  width: 100px;
+  margin: 0;
+  padding: 5px;
+  display: block;
+  background-color: white;
+  border: 1px solid lightgrey;
+  border-radius: 3px 3px 3px 3px;
+}
+
+
+
+/* CALENDAR STYLING */
+.calendar-container {
+  position: relative;
+}
+
+.calendar_box {
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  height: auto;
+  width: 300px;
+  margin: 0;
+  padding: 5px;
+  display: block;
+  background-color: white;
+  border: 1px solid lightgrey;
+  border-radius: 3px 3px 3px 3px;
+
+  .calendar_header {
+    display: flex;
+    div {
+      flex-grow: 1;
+      flex-shrink: 1;
+      flex-basis: 0;
+    }
+    .calendar_nav--prev {
+      text-align: left;
+    }
+    .calendar_month {
+      font-size: 14px;
+      font-weight: 300;
+      text-align: right;
+      padding-right: 2px;
+    }
+    .calendar_year {
+      font-size: 14px;
+      font-weight: 300;
+      text-align: left;
+      padding-left: 2px;
+    }
+    .calendar_nav--next {
+      text-align: right;
+    }
+    button {
+      width:40px;
+      height: 40px;
+      border:0;
+      border-radius: 20px 20px 20px 20px;
+      line-height:40px;
+      font-size: 19px;
+      cursor: pointer;
+      &:hover{
+        background-color: lightgrey;
+      }
+    }
+  }
+
+
+  .calendar_table {
+    width:100%;
+    th {
+      text-align: center;
+      vertical-align: middle;
+      height:40px;
+      font-size: 16px;
+      font-weight: 300;
+    }
+    td {
+      text-align: center;
+      vertical-align: middle;
+      height:40px;
+      font-weight: normal;
+    }
+    .active {
+      font-size: 19px;
+      cursor: pointer;
+      border-radius: 20px 20px 20px 20px;
+      line-height:40px;
+      &:hover{
+        background-color: lightgrey;
+      }
+    }
+    .activeselectedButton {
+      font-size: 19px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 20px 20px 20px 20px;
+      line-height:40px;
+      background-color: orange;
+    }
+    .dayAndTime {
+    }
+    .weekDay {
+    }
+    .month {
+    }
+    .day {
+    }
+  }
+
+
+
+
+  .calendar {
+  }
+
+  .calendarTitle {
+  }
+
+  .calendarYear {
+  }
+
+  .fullWidth {
+  }
+
+  .date-small {
+  }
+
+  .weekDay-small {
+  }
+
+  .month-small {
+  }
+
+  .day-disabled {
+    background-color: red;
+  }
+
+  .calendar-small {
+  }
+
+  .calendarTitle-small {
+  }
+
+  .calendarYear-small {
+  }
+}
+
+
+/* TIME STYLING */
+
+.time-container {
+  position: relative;
+}
+.time_box {
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  height: auto;
+  width: 100px;
+  margin: 0;
+  padding: 5px;
+  display: block;
+  background-color: white;
+  border: 1px solid lightgrey;
+  border-radius: 3px 3px 3px 3px;
+}
