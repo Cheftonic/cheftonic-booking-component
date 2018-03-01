@@ -56,7 +56,7 @@ mutation BookRequest ($booking_info: BookRequestInput!) {
  */
 @Component({
   tag: 'cheftonic-booking-component',
-  styleUrl: 'make-booking.css',
+  styleUrl: 'cheftonic-booking-component.scss',
   shadow: true
 })
 export class MakeBookingComponent {

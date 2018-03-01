@@ -21,7 +21,7 @@ declare global {
 
 import {
   MakeBookingComponent as CheftonicBookingComponent
-} from './components/make-booking/make-booking';
+} from './components/cheftonic-booking-component/cheftonic-booking-component';
 
 declare global {
   interface HTMLCheftonicBookingComponentElement extends CheftonicBookingComponent, HTMLStencilElement {
