@@ -23,16 +23,13 @@
   .cheftonic-booking-container .man-text {
     font-size: 3rem; }
   .cheftonic-booking-container .submit-booking-col {
-    border: thin solid lightgrey;
+    border: thin solid rgba(0, 0, 0, 0.2);
     border-right: 0; }
     .cheftonic-booking-container .submit-booking-col:last-child {
-      border-right: thin solid lightgrey; }
+      border-right: thin solid rgba(0, 0, 0, 0.2); }
   .cheftonic-booking-container .submit-booking-button {
     background-color: #00A97E;
     color: white; }
-  .cheftonic-booking-container .pax-list {
-    padding: 0;
-    margin: 0; }
 
 /* PEOPLE STYLING */
 .people-container {
@@ -45,11 +42,26 @@
   height: auto;
   width: 100px;
   margin: 0;
-  padding: 5px;
+  padding: 0;
   display: block;
   background-color: white;
-  border: 1px solid lightgrey;
+  border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 3px 3px 3px 3px; }
+  .people_box .pax-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0; }
+    .people_box .pax-list li {
+      height: 30px;
+      line-height: 30px;
+      padding: 5px;
+      margin: 0;
+      border-bottom: thin solid rgba(0, 0, 0, 0.2);
+      cursor: pointer; }
+      .people_box .pax-list li:last-child {
+        border-bottom: 0; }
+      .people_box .pax-list li:hover {
+        background: rgba(0, 0, 0, 0.05); }
 
 /* CALENDAR STYLING */
 .calendar-container {
@@ -57,15 +69,17 @@
 
 .calendar_box {
   position: absolute;
-  top: -10px;
-  left: 10px;
   height: auto;
   width: 300px;
-  margin: 0;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  top: -10px;
   padding: 5px;
   display: block;
   background-color: white;
-  border: 1px solid lightgrey;
+  border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 3px 3px 3px 3px; }
   .calendar_box .calendar_header {
     display: flex; }
@@ -96,7 +110,7 @@
       font-size: 19px;
       cursor: pointer; }
       .calendar_box .calendar_header button:hover {
-        background-color: lightgrey; }
+        background-color: rgba(0, 0, 0, 0.05); }
   .calendar_box .calendar_table {
     width: 100%; }
     .calendar_box .calendar_table th {
@@ -116,7 +130,7 @@
       border-radius: 20px 20px 20px 20px;
       line-height: 40px; }
       .calendar_box .calendar_table .active:hover {
-        background-color: lightgrey; }
+        background-color: rgba(0, 0, 0, 0.05); }
     .calendar_box .calendar_table .activeselectedButton {
       font-size: 19px;
       font-weight: bold;
@@ -134,14 +148,14 @@
 .time_box {
   position: absolute;
   top: -10px;
-  left: 10px;
+  right: 10px;
   height: auto;
   width: 100px;
   margin: 0;
   padding: 5px;
   display: block;
   background-color: white;
-  border: 1px solid lightgrey;
+  border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 3px 3px 3px 3px; }
 
 /*# sourceMappingURL=make-booking.css.map */

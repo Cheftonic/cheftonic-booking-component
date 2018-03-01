@@ -36,11 +36,11 @@
   }
 
   .submit-booking-col {
-    border: thin solid lightgrey;
+    border: thin solid rgba(0,0,0,0.2);
     border-right: 0;
 
     &:last-child {
-      border-right: thin solid lightgrey;
+      border-right: thin solid rgba(0,0,0,0.2);
     }
   }
 
@@ -49,10 +49,6 @@
     color: white;
   }
 
-  .pax-list {
-    padding: 0;
-    margin: 0;
-  }
 }
 
 
@@ -67,12 +63,31 @@
   left: 10px;
   height: auto;
   width: 100px;
-  margin: 0;
-  padding: 5px;
+  margin:0;
+  padding:0;
   display: block;
   background-color: white;
-  border: 1px solid lightgrey;
+  border: 1px solid rgba(0,0,0,0.2);
   border-radius: 3px 3px 3px 3px;
+  .pax-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    li {
+      height: 30px;
+      line-height: 30px;
+      padding: 5px;
+      margin: 0;
+      border-bottom: thin solid rgba(0,0,0,0.2);
+      cursor: pointer;
+      &:last-child {
+        border-bottom: 0;
+      }
+      &:hover {
+        background: rgba(0,0,0,0.05);
+      }
+    }
+  }
 }
 
 
@@ -84,17 +99,18 @@
 
 .calendar_box {
   position: absolute;
-  top: -10px;
-  left: 10px;
   height: auto;
   width: 300px;
-  margin: 0;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  top: -10px;
   padding: 5px;
   display: block;
   background-color: white;
-  border: 1px solid lightgrey;
+  border: 1px solid rgba(0,0,0,0.2);
   border-radius: 3px 3px 3px 3px;
-
   .calendar_header {
     display: flex;
     div {
@@ -129,7 +145,7 @@
       font-size: 19px;
       cursor: pointer;
       &:hover{
-        background-color: lightgrey;
+        background-color: rgba(0,0,0,0.05);
       }
     }
   }
@@ -156,7 +172,7 @@
       border-radius: 20px 20px 20px 20px;
       line-height:40px;
       &:hover{
-        background-color: lightgrey;
+        background-color: rgba(0,0,0,0.05);
       }
     }
     .activeselectedButton {
@@ -224,13 +240,13 @@
 .time_box {
   position: absolute;
   top: -10px;
-  left: 10px;
+  right: 10px;
   height: auto;
   width: 100px;
   margin: 0;
   padding: 5px;
   display: block;
   background-color: white;
-  border: 1px solid lightgrey;
+  border: 1px solid rgba(0,0,0,0.2);
   border-radius: 3px 3px 3px 3px;
 }
