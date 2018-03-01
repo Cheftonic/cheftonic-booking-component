@@ -108,13 +108,13 @@ export class HourMinute {
 
   renderHourMinute() {
     return (
-      <ul class="list">
-        { this.allTimes.map (time => 
+      <ul class="time-list">
+        { this.allTimes.map (time =>
           <li value= {time} onClick={this.setTime.bind(this)} class="booking_time">
             { time }
           </li>
         )}
-      
+
   </ul>
     )
   }

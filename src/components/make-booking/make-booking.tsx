@@ -441,7 +441,7 @@ export class MakeBookingComponent {
       )
     }
     return (
-      <div>
+      <div class="cheftonic-booking-wrapper">
         {(this.booking_state == BookingStates.invalid_day) && <span style={{color: 'white', background: 'red'}}>El restaurante está cerrado hoy, por favor seleccione otra fecha.</span>}
         <div class="cheftonic-booking-container">
           <div class="submit-booking-col" onClick = {this.togglePaxShow.bind(this)}>
@@ -482,24 +482,26 @@ export class MakeBookingComponent {
           </div>
         }
 
-        <form onSubmit={() => this.submitBooking()}>
-
-        <label>
-            Teléfono:
-            <input type="number" value={this.bookingInfo.phone} onInput={(e) => this.handlePhoneChange(e)} pattern="/^[0-9]{9,9}$/" placeholder="654321123"/>
-          </label>
-
-          <label>
-            Email:
-            <input type="email" value={this.bookingInfo.email} onInput={(e) => this.handleEmailChange(e)} placeholder="you@somewhere.something"/>
-          </label>
-
-          <label>
-            Solicitud particular
-            <input type="text" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui ti tiene alguna solicitud particular."/>
-          </label>
-
-          <input type="submit" value="Reservar"/>
+        <form onSubmit={() => this.submitBooking()} class="customer-details">
+          <ul class="contact-details">
+            <li class="phone-number">
+              <div>
+                <label htmlFor="phone-number">Teléfono</label>
+                <input type="number" id="phone-number" value={this.bookingInfo.phone} onInput={(e) => this.handlePhoneChange(e)} pattern="/^[0-9]{9,9}$/" placeholder="654321123"/>
+              </div>
+            </li>
+            <li class="email-address">
+              <div>
+                <label htmlFor="email-address">Email</label>
+                <input type="email" id="email-address" value={this.bookingInfo.email} onInput={(e) => this.handleEmailChange(e)} placeholder="you@somewhere.something"/>
+              </div>
+            </li>
+          </ul>
+          <div class="special-requests">
+              <label htmlFor="special-requests">Solicitud particular</label>
+              <input type="text" id="special-requests" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui ti tiene alguna solicitud particular."/>
+          </div>
+          <input type="submit" class="button-submit" value="Reservar"/>
         </form>
       </div>
     )
