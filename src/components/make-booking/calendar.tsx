@@ -67,6 +67,7 @@ export class Calendar {
       this.masterData.getMasterDataInfo(MasterDataKeys.MONTHS)
     ])
   }
+  
   async setConfig (calConfig: CalendarConfig) {
     console.log ('Setting calendar to this config: ' + JSON.stringify(calConfig, null, 2));
     this.defaultCalendarConfig = calConfig;
@@ -79,11 +80,12 @@ export class Calendar {
       this.selectedYear = this.defaultCalendarConfig.dateFrom.getFullYear();
       // Reset parsedDates and generate new dates
       this.parsedDates = {monthName: '', week: [{day: new Array<CalendarDay>()}]};
-      await this.initCalendar();
+      
+      this.initCalendar();
     }
   }
 
-  async initCalendar() {
+  initCalendar() {
     this.defaultCalendarConfig = {...this.defaultCalendarConfig, ...this.inputCalendarConfig};
 
     console.log ('Calendar effective config: ' + JSON.stringify (this.defaultCalendarConfig, null, 2));
