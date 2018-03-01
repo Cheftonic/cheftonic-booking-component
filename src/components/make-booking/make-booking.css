@@ -7,7 +7,7 @@
   .cheftonic-booking-container > div {
     margin: 0;
     line-height: 1.43;
-    font-size: 1rem;
+    font-size: 19px;
     padding: 15px 5px;
     cursor: pointer; }
     .cheftonic-booking-container > div:hover {
@@ -67,69 +67,65 @@
   background-color: white;
   border: 1px solid lightgrey;
   border-radius: 3px 3px 3px 3px; }
-  .calendar_box .calendar_header .calendar_nav--prev {
-    width: 25%;
-    float: left; }
-  .calendar_box .calendar_header .calender_date .calendar_month {
-    font-size: 19px;
-    font-weight: bold;
-    width: 50%;
-    float: left; }
-  .calendar_box .calendar_header .calender_date .calendar_year {
-    font-size: 14px; }
-  .calendar_box .calendar_header .calendar_nav--next {
-    width: 25%;
-    float: left; }
-  .calendar_box .selected-day {
-    background-color: orange; }
-  .calendar_box .dayAndTime {
-    font-size: -webkit-xxx-large;
-    font-weight: bold; }
-  .calendar_box .weekDay {
-    font-size: x-large;
-    font-weight: bold; }
-  .calendar_box .month {
-    font-size: x-large; }
-  .calendar_box .day {
-    width: 80%;
-    font-size: large; }
-  .calendar_box .calendar {
-    text-align: center; }
-  .calendar_box .calendarTitle {
-    text-align: center;
-    padding-top: 10px; }
-  .calendar_box .calendarYear {
-    text-align: center;
-    padding-top: 3px;
-    font-size: medium; }
-  .calendar_box .fullWidth {
+  .calendar_box .calendar_header {
+    display: flex; }
+    .calendar_box .calendar_header div {
+      flex-grow: 1;
+      flex-shrink: 1;
+      flex-basis: 0; }
+    .calendar_box .calendar_header .calendar_nav--prev {
+      text-align: left; }
+    .calendar_box .calendar_header .calendar_month {
+      font-size: 14px;
+      font-weight: 300;
+      text-align: right;
+      padding-right: 2px; }
+    .calendar_box .calendar_header .calendar_year {
+      font-size: 14px;
+      font-weight: 300;
+      text-align: left;
+      padding-left: 2px; }
+    .calendar_box .calendar_header .calendar_nav--next {
+      text-align: right; }
+    .calendar_box .calendar_header button {
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 20px 20px 20px 20px;
+      line-height: 40px;
+      font-size: 19px;
+      cursor: pointer; }
+      .calendar_box .calendar_header button:hover {
+        background-color: lightgrey; }
+  .calendar_box .calendar_table {
     width: 100%; }
-  .calendar_box .date-small {
-    height: 90%;
-    width: 90%;
-    margin: 0;
-    padding: 1px; }
-  .calendar_box .weekDay-small {
-    font-size: x-small;
-    font-weight: bold; }
-  .calendar_box .month-small {
-    font-size: x-small; }
-  .calendar_box .day-small {
-    width: 80%;
-    font-size: x-small; }
+    .calendar_box .calendar_table th {
+      text-align: center;
+      vertical-align: middle;
+      height: 40px;
+      font-size: 16px;
+      font-weight: 300; }
+    .calendar_box .calendar_table td {
+      text-align: center;
+      vertical-align: middle;
+      height: 40px;
+      font-weight: normal; }
+    .calendar_box .calendar_table .active {
+      font-size: 19px;
+      cursor: pointer;
+      border-radius: 20px 20px 20px 20px;
+      line-height: 40px; }
+      .calendar_box .calendar_table .active:hover {
+        background-color: lightgrey; }
+    .calendar_box .calendar_table .activeselectedButton {
+      font-size: 19px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 20px 20px 20px 20px;
+      line-height: 40px;
+      background-color: orange; }
   .calendar_box .day-disabled {
-    background-color: whitesmoke; }
-  .calendar_box .calendar-small {
-    text-align: center;
-    font-size: x-small;
-    font-weight: bold; }
-  .calendar_box .calendarTitle-small {
-    text-align: center;
-    padding-top: 2px; }
-  .calendar_box .calendarYear-small {
-    text-align: center;
-    padding-top: 1px;
-    font-size: small; }
+    background-color: red; }
 
 /* TIME STYLING */
 .time-container {

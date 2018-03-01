@@ -276,8 +276,8 @@ export class Calendar {
     if ((week.day[wd])  && ! this.isDisabled(week.day[wd])) {
       return (
         <td role="presentation">
-          <div class = {'day-small '.concat(this.isSelectedDay(week.day[wd].date))}  id={ week.day[wd].date } onClick = {this.assignDate.bind(this)}>
-            { week.day[wd].dayOfMonth }
+          <div class = {'day-small active'.concat(this.isSelectedDay(week.day[wd].date))}  id={ week.day[wd].date } onClick = {this.assignDate.bind(this)}>
+          { week.day[wd].dayOfMonth }
           </div>
         </td>
       )
