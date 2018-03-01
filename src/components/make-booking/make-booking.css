@@ -95,12 +95,14 @@
       font-size: 14px;
       font-weight: 300;
       text-align: right;
-      padding-right: 2px; }
+      padding-right: 2px;
+      line-height: 45px; }
     .calendar_box .calendar_header .calendar_year {
       font-size: 14px;
       font-weight: 300;
       text-align: left;
-      padding-left: 2px; }
+      padding-left: 2px;
+      line-height: 45px; }
     .calendar_box .calendar_header .calendar_nav--next {
       text-align: right; }
     .calendar_box .calendar_header button {
