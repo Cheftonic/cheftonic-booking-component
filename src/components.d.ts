@@ -20,30 +20,30 @@ declare global {
 
 
 import {
-  MakeBookingComponent as MakeBooking
+  MakeBookingComponent as CheftonicBookingComponent
 } from './components/make-booking/make-booking';
 
 declare global {
-  interface HTMLMakeBookingElement extends MakeBooking, HTMLStencilElement {
+  interface HTMLCheftonicBookingComponentElement extends CheftonicBookingComponent, HTMLStencilElement {
   }
-  var HTMLMakeBookingElement: {
-    prototype: HTMLMakeBookingElement;
-    new (): HTMLMakeBookingElement;
+  var HTMLCheftonicBookingComponentElement: {
+    prototype: HTMLCheftonicBookingComponentElement;
+    new (): HTMLCheftonicBookingComponentElement;
   };
   interface HTMLElementTagNameMap {
-    "make-booking": HTMLMakeBookingElement;
+    "cheftonic-booking-component": HTMLCheftonicBookingComponentElement;
   }
   interface ElementTagNameMap {
-    "make-booking": HTMLMakeBookingElement;
+    "cheftonic-booking-component": HTMLCheftonicBookingComponentElement;
   }
   namespace JSX {
     interface IntrinsicElements {
-      "make-booking": JSXElements.MakeBookingAttributes;
+      "cheftonic-booking-component": JSXElements.CheftonicBookingComponentAttributes;
     }
   }
   namespace JSXElements {
-    export interface MakeBookingAttributes extends HTMLAttributes {
-      restid?: string;
+    export interface CheftonicBookingComponentAttributes extends HTMLAttributes {
+      apikey?: string;
     }
   }
 }

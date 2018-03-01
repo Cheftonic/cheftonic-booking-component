@@ -56,12 +56,16 @@ mutation BookRequest ($booking_info: BookRequestInput!) {
  * Read the README file to know about component's functionality
  */
 @Component({
-  tag: 'make-booking',
-  styleUrl: 'make-booking.css'
+  tag: 'cheftonic-booking-component',
+  styleUrl: 'make-booking.css',
+  shadow: true
 })
 export class MakeBookingComponent {
+  // The input object is an API Key identifier, bounded to the particular business.
+  @Prop() apikey: string;
+
   // The input object is the restaurant_id where the user wants to make the booking
-  @Prop() restid: string = "b6a26c75-f280-4964-9659-534a51178e4f.0";
+  restid: string;
 
   // Internal object to represent the data of the booking
   bookingInfo: BookingInfo;
@@ -92,10 +96,7 @@ export class MakeBookingComponent {
   phone_required: boolean;
 
   // Restaurant load status
-  restaurant_status: String;
-  ok: String = 'OK';
-  info_pending: String = 'pending';
-  not_loaded: String = 'no_load';
+  restaurant_status: RestaurantStates;
 
   // Providers
   _apolloProvider: ApolloClientProvider;
@@ -108,34 +109,7 @@ export class MakeBookingComponent {
   constructor() {
     this._apolloProvider = new ApolloClientProvider();
     this._masterDataProvider = new MasterDataProvider(this._apolloProvider);
-    
-    this._daySelector = new Calendar(this._masterDataProvider, 
-      async (param) => {
-        const selectedDay = param.pop();
-        this.bookingInfo.day = selectedDay;
-        await this.setHourMinuteConfigForDate (selectedDay);
-        await this._timeSelector.setConfig (this.hourMinuteConfig);
-        this.toggleCalendarShow();
-        console.log ('MAKE-BOOKING SELECT DAY - ' + this.bookingInfo.day);
-      }
-      , async (param) => {
-      console.log ('MAKE-BOOKING MONTH CHANGE - ' + param.toISOString());
-      await this.setCalendarConfigFromDate(param);
-      await this._daySelector.setConfig (this.calendarConfig);
-
-      // Don't display the hourMinute component until some day is selected
-      this.hourMinuteConfig = null;
-      this.showHourMinute = false;
-    });
-    
-    this._timeSelector = new HourMinute((param) => {
-      this.bookingInfo.time = param;
-      const [hour, minutes] = param.split(':');
-      this.bookingInfo.day.setHours (+hour, +minutes, 0, 0);
-      this.toggleTimeShow();
-      console.log ('MAKE-BOOKING FULL TIME - ' + this.bookingInfo.day.toISOString());
-    });
-
+  
     // Initialize default booking setup
     this.bookingInfo = new BookingInfo();
     this.bookingInfo.pax = 2;
@@ -148,42 +122,85 @@ export class MakeBookingComponent {
     this.showHourMinute = false;
 
     this.booking_state = BookingStates.not_submitted;
-    this.restaurant_status = this.not_loaded;
+    this.restaurant_status = RestaurantStates.not_loaded;
+  }
+
+  private isValidKey (key:string):boolean {
+    const restIdRegexp = '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}.[0-9]{1,3}$'
+    console.log ('Validating key ['+key+']: ' + new RegExp(restIdRegexp).test(key));
+    return new RegExp(restIdRegexp).test(key);
+  }
+
+  private initSelectors() {
+    this._daySelector = new Calendar(this._masterDataProvider, 
+      async (param) => {
+        const selectedDay = param.pop();
+        this.bookingInfo.day = selectedDay;
+        await this.setHourMinuteConfigForDate (selectedDay);
+        await this._timeSelector.setConfig (this.hourMinuteConfig);
+        this.toggleCalendarShow();
+        console.log ('MAKE-BOOKING SELECT DAY - ' + this.bookingInfo.day);
+      }
+      , async (param) => {
+        console.log ('MAKE-BOOKING MONTH CHANGE - ' + param.toISOString());
+        this.setCalendarConfigFromDate(param);
+        await this._daySelector.setConfig (this.calendarConfig);
+
+        // Don't display the hourMinute component until some day is selected
+        this.showHourMinute = false;
+      });
+    
+    this._timeSelector = new HourMinute((param) => {
+      this.bookingInfo.time = param;
+      const [hour, minutes] = param.split(':');
+      this.bookingInfo.day.setHours (+hour, +minutes, 0, 0);
+      this.toggleTimeShow();
+      console.log ('MAKE-BOOKING FULL TIME - ' + this.bookingInfo.day.toISOString());
+    });
   }
 
   async componentWillLoad() {
-    console.log ("Apollo client version: " + this._apolloProvider.getApolloClient().version);
-    const restQuery = await this._apolloProvider.getApolloClient().query<RestaurantBookingInfoQuery> ({
-      query: RestaurantBookingInfo,
-      variables: {
-        b_r_id: this.restid
+    // Validate input parameter
+    if (this.isValidKey(this.apikey)) {
+      this.restid = this.apikey;
+      console.log ("Apollo client version: " + this._apolloProvider.getApolloClient().version);
+      const restQuery = await this._apolloProvider.getApolloClient().query<RestaurantBookingInfoQuery> ({
+        query: RestaurantBookingInfo,
+        variables: {
+          b_r_id: this.restid
+        }
+      })
+      const restData = restQuery.data;
+      // console.log ("Restaurant info retrieved: " + JSON.stringify(data, null, 2));
+      if (restData.getRestaurantById.opening && restData.getRestaurantById.services && restData.getRestaurantById.services.length > 0) {
+        // Fetch the data
+        this.opening = restData.getRestaurantById.opening;
+        this.services = restData.getRestaurantById.services;
+        this.openHoursPerDay = new Map<string, DayHours>();
+        
+        this.initSelectors();
+
+        // The calendar should start 1h 30 mins ahead of current time
+        this.setCalendarConfigFromDate (this.in1Hour30Minutes());
+        
+        await this._daySelector.setConfig (this.calendarConfig);
+
+        await this.setHourMinuteConfigForDate (this.in1Hour30Minutes());
+        
+        await this._timeSelector.setConfig (this.hourMinuteConfig);
+
+        const [hour, minutes] = this.hourMinuteConfig.initialValue.split(':');
+        this.bookingInfo.day.setHours (+hour, +minutes, 0, 0);
+        
+        // The restaurant is loaded and ready to receive bookings
+        this.restaurant_status = RestaurantStates.ok;
+      } else {
+        // There is no info about opening and/or services, mark it.
+        this.restaurant_status = RestaurantStates.info_pending;
       }
-    })
-    const restData = restQuery.data;
-    // console.log ("Restaurant info retrieved: " + JSON.stringify(data, null, 2));
-    if (restData.getRestaurantById.opening && restData.getRestaurantById.services && restData.getRestaurantById.services.length > 0) {
-      // Fetch the data
-      this.opening = restData.getRestaurantById.opening;
-      this.services = restData.getRestaurantById.services;
-      this.openHoursPerDay = new Map<string, DayHours>();
-
-      // The calendar should start 1h 30 mins ahead of current time
-      await this.setCalendarConfigFromDate (this.in1Hour30Minutes());
-      
-      await this._daySelector.setConfig (this.calendarConfig);
-
-      await this.setHourMinuteConfigForDate (this.in1Hour30Minutes());
-
-      const [hour, minutes] = this.hourMinuteConfig.initialValue.split(':');
-      this.bookingInfo.day.setHours (+hour, +minutes, 0, 0);
-      
-      await this._timeSelector.setConfig (this.hourMinuteConfig);
-      
-      // The restaurant is loaded and ready to receive bookings
-      this.restaurant_status = this.ok;
     } else {
-      // There is no info about opening and/or services, mark it.
-      this.restaurant_status = this.info_pending;
+      // TODO: Invalid key, show an error
+      this.booking_state = BookingStates.invalid_id;
     }
   }
 
@@ -194,7 +211,7 @@ export class MakeBookingComponent {
     return in1HourAnd30Minutes;
   }
 
-  private async setCalendarConfigFromDate (initialDay: Date) {
+  private setCalendarConfigFromDate (initialDay: Date) {
     // Check if it's the current month, in which case it will start in 1hour 30 mins
     initialDay = (initialDay.getMonth() === new Date().getMonth()) ? this.in1Hour30Minutes() : initialDay;
 
@@ -207,7 +224,6 @@ export class MakeBookingComponent {
       };
 
       // Don't display the hourMinute component until some day is selected
-      this.hourMinuteConfig = null;
       this.showHourMinute = false;
   }
 
@@ -223,9 +239,12 @@ export class MakeBookingComponent {
       const hoursArray = dayHours.hours.sort((a, b) => a - b).map (h => '0'.concat(h.toString()).slice(-2));
       newHourMinuteConfig.initialValue = hoursArray[0].concat (':00');
       newHourMinuteConfig.hoursToShow = hoursArray;
+      this.booking_state = BookingStates.not_submitted;
     } else {
       // This means that there are no available hours
-      this.hourMinuteConfig.hoursToShow = [];
+      newHourMinuteConfig.hoursToShow = [];
+      newHourMinuteConfig.initialValue = '12:00'
+      this.booking_state = BookingStates.invalid_day;
     }
 
     this.bookingInfo.time = newHourMinuteConfig.initialValue;
@@ -344,7 +363,9 @@ export class MakeBookingComponent {
   }
 
   toggleTimeShow() {
-    this.showTime = !this.showTime;
+    if (!(this.booking_state == BookingStates.invalid_day)) {
+      this.showTime = !this.showTime;
+    }
   }
 
   togglePaxShow() {
@@ -408,8 +429,16 @@ export class MakeBookingComponent {
   }
 
   render () {
+    if (this.booking_state == BookingStates.invalid_id) {
+      return (
+        <div>
+          Your Cheftonic web component seems invalid. Please contact us to fix it to cdb@cheftonic.com. Please include this info: apikey = {this.apikey}
+        </div>
+      )
+    }
     return (
       <div>
+        {(this.booking_state == BookingStates.invalid_day) && <span style={{color: 'white', background: 'red'}}>El restaurante está cerrado hoy, por favor seleccione otra fecha.</span>}
         <div class="cheftonic-booking-container">
           <div class="submit-booking-col" onClick = {this.toggleCalendarShow.bind(this)}>
               <label class="booking-bar-date">{ this.bookingInfo.day.toDateString() }</label>
@@ -422,21 +451,19 @@ export class MakeBookingComponent {
           </div>
         </div>
         
-        {(this.showCalendar) ?
+        {(this.showCalendar) &&
           <div id="booking-cal-container">
             { this._daySelector.renderCalendar() }
           </div>
-          : <div></div>
         }
           
-        {(this.showTime) ?
+        {(this.showTime) &&
           <div id="booking-time-container" style={{display: 'block'}}>
             { this._timeSelector.renderHourMinute() }
           </div>
-          :<div></div>
         }
       
-        {(this.showPax) ?
+        {(this.showPax) &&
           <div id="booking-pax-container" style={{display: 'block', top: '-290px'}}>
             <div style={{height: '100px', overflow: 'auto'}}>
               <ul class="pax-list">
@@ -449,7 +476,6 @@ export class MakeBookingComponent {
               </ul>
             </div>
           </div>
-          : <div></div>
         }
 
         <form onSubmit={() => this.submitBooking()}>
@@ -497,6 +523,14 @@ enum BookingStates {
   submitting = 'SUBMITTING',
   submitted_ok = 'SUBMITTED_OK',
   submitted_ko = 'SUBMITTED_KO',
+  invalid_day = 'INVALID_DAY',
+  invalid_id = 'INVALID_ID',
+}
+
+enum RestaurantStates {
+  ok = 'OK',
+  info_pending = 'LOAD_PENDING',
+  not_loaded = 'NOT_LOADED'
 }
 
 const getCheftonicDate = (date: Date) => (date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate());
