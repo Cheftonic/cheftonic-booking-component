@@ -50,8 +50,10 @@ export class ApolloClientProvider {
       // cacheResolvers: // cache resolvers
     }).restore({});
 
-    const httpLink = new HttpLink ({ uri: 'https://apidev.cheftonic.com/dev/chftqry' });
-    // const httpLink = new HttpLink ({ uri: 'http://localhost:3000/chftqry' });
+    const httpLink = new HttpLink ({ 
+       uri: 'https://apidev.cheftonic.com/dev/chftqry'
+      // uri: 'http://localhost:3000/chftqry' 
+    });
 
 
     const cleanTypenameLink = new ApolloLink((operation, forward) => {
