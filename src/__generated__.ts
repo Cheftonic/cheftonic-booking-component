@@ -1,50 +1,18 @@
 /* tslint:disable */
 //  This file was automatically generated and should not be edited.
 
-export interface BookRequestInput {
+export interface ExtBookRequestInput {
   b_r_id: string,
-  book_id?: string | null,
-  p_id?: string | null,
-  curr_ver?: number | null,
-  channel: string,
   book_date: string,
   made_on: string,
-  status?: string | null,
   num_pax: number,
-  special_need?: Array< string | null > | null,
   notes?: string | null,
-  floorplan?: string | null,
-  rest_area?: string | null,
+  phone: string,
+  email: string,
+  name: string,
+  surname: string,
   service: string,
-  table?: string | null,
-  food_order?: Array< string | null > | null,
-  person?: PersonInput | null,
-};
-
-export interface PersonInput {
-  p_id?: string | null,
-  email?: Array< string | null > | null,
-  phone?: string | null,
-  name?: string | null,
-  surname?: string | null,
-  birthdate?: string | null,
-  gender?: string | null,
-  def_address?: AddressDetailInput | null,
-  addresses?: Array< AddressDetailInput | null > | null,
-};
-
-export interface AddressDetailInput {
-  country: string,
-  region: string,
-  city: string,
-  street: string,
-  num?: number | null,
-  post_code?: string | null,
-  ext_info?: string | null,
-  lat?: number | null,
-  lng?: number | null,
-  parking?: string | null,
-  public_transport?: string | null,
+  channel: string,
 };
 
 export interface RestaurantBookingInfoQueryVariables {
@@ -85,12 +53,12 @@ export interface RestaurantBookingInfoQuery {
 };
 
 export interface BookRequestMutationVariables {
-  booking_info: BookRequestInput,
+  booking_info: ExtBookRequestInput,
 };
 
 export interface BookRequestMutation {
-  // This is for users creating their book requests
-  createMyBookRequest:  {
+  // External Operation - Create book request
+  createExtBookRequest:  {
     // bookRequest ID
     book_id: string,
     book_date: string,

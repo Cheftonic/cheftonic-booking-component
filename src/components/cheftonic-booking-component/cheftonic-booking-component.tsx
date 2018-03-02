@@ -2,7 +2,7 @@ import { Component, Prop, State } from '@stencil/core';
 import { ApolloClientProvider, MasterDataProvider } from '../../providers/providers';
 import gql from 'graphql-tag';
 
-import { BookRequestInput, RestaurantBookingInfoQuery } from '../../__generated__';
+import { ExtBookRequestInput, RestaurantBookingInfoQuery } from '../../__generated__';
 import { Calendar, CalendarConfig } from './calendar';
 import { HourMinuteConfig, MinutesInterval, HourMinute } from './hour-minute';
 
@@ -36,11 +36,10 @@ query RestaurantBookingInfo ($b_r_id: ID!) {
     }
   }
 }`;
-// createBookRequest (book_request: BookRequestInput!): BookRequest
 
-/*const CreateBookRequest = gql`
-mutation BookRequest ($booking_info: BookRequestInput!) {
-  createMyBookRequest (book_request: $booking_info) {
+const CreateBookRequest = gql`
+mutation BookRequest ($booking_info: ExtBookRequestInput!) {
+  createExtBookRequest (book_request: $booking_info) {
     book_id
     book_date
     made_on
@@ -49,7 +48,7 @@ mutation BookRequest ($booking_info: BookRequestInput!) {
     notes
   }
 }
-`;*/
+`;
 
 /**
  * Read the README file to know about component's functionality
@@ -117,7 +116,6 @@ export class MakeBookingComponent {
     this.bookingInfo.day = in1Hour;
     this.bookingInfo.time = in1Hour.getHours() + ':00';
 
-    this.bookingInfo.phoneChanged = false;
     this.showHourMinute = false;
 
     this.booking_state = BookingStates.not_submitted;
@@ -376,32 +374,28 @@ export class MakeBookingComponent {
     this.showPax = !this.showPax;
   }
 
-  onPhoneChange() {
-    this.bookingInfo.phoneChanged = true;
-    this.userPhoneValid = new RegExp(/^[0-9]{9,9}$/).test(this.bookingInfo.phone);
-  }
-
   submitBooking() {
     if ((this.phone_required && this.userPhoneValid) || (! this.phone_required)) {
       // Check if the phone has been filled correctly
       this.booking_state = BookingStates.submitting;
-      // Constant to calculate the service beign booked
-      const bookHour = this.bookingInfo.time.split(':')[0];
       // Build the BookingInput object
-      const bookRequestInput:BookRequestInput = {
+      const bookRequestInput:ExtBookRequestInput = {
         b_r_id : this.restid,
-        // p_id: this.user.person.p_id,
-        made_on: new Date().toISOString(),
         book_date: this.bookingInfo.day.toISOString(),
-        notes: this.bookingInfo.notes,
+        made_on: new Date().toISOString(),
         num_pax: this.bookingInfo.pax,
+        notes: this.bookingInfo.notes,
+        phone: this.bookingInfo.phone,
+        email: this.bookingInfo.email,
+        name: this.bookingInfo.name,
+        surname: this.bookingInfo.surname,
         channel: 'external_web',
-        service: this.services.find ((service) => (bookHour >= service.starts_at && bookHour < service.ends_at)).rs_id
+        service: this.services.find ((service) => (this.bookingInfo.time >= service.starts_at && this.bookingInfo.time < service.ends_at)).rs_id
       };
 
       console.log ('Submitting booking info: ' + JSON.stringify(bookRequestInput,null,2));
 
-      /*this._apolloProvider.getApolloClient().mutate<BookRequestInput> ({
+      this._apolloProvider.getApolloClient().mutate<ExtBookRequestInput> ({
         mutation: CreateBookRequest,
         variables: {
           booking_info: bookRequestInput
@@ -413,7 +407,7 @@ export class MakeBookingComponent {
       }, error => {
         this.booking_state = BookingStates.submitted_ko;
         console.log ('Booking submitted with errors: ' + error);
-      });*/
+      });
     }
   }
 
@@ -496,18 +490,18 @@ export class MakeBookingComponent {
           </div>
         }
 
-        <form onSubmit={() => this.submitBooking()} class="customer-details">
+        <form class="customer-details">
         <ul class="contact-details">
             <li class="name">
               <div>
                 <label htmlFor="name">Nombre</label>
-                <input type="text" id="name" value={this.bookingInfo.name} onInput={(e) => this.handleNameChange(e)} pattern="/[A-zÀ-ú ]{3,20}$/" placeholder="Alfonso"/>
+                <input type="text" id="name" required value={this.bookingInfo.name} onInput={(e) => this.handleNameChange(e)} pattern="[A-zÀ-ú ]{3,20}$" placeholder="Alfonso" title="El nombre únicamente puede contener entre 3 y 20 caracteres mayúsculas, minúsculas, caracteres acentuados y espacios. p.e. Alfonso Víctor"/>
               </div>
             </li>
             <li class="surname">
               <div>
                 <label htmlFor="surname">Apellido</label>
-                <input type="text" id="surname" value={this.bookingInfo.surname} onInput={(e) => this.handleSurnameChange(e)}  pattern="/[A-zÀ-ú ]{3,20}$/" placeholder="García"/>
+                <input type="text" id="surname" required value={this.bookingInfo.surname} onInput={(e) => this.handleSurnameChange(e)}  pattern="[A-zÀ-ú  -]{3,20}" placeholder="García" title="El apellido únicamente puede contener entre 3 y 20 caracteres mayúsculas, minúsculas, caracteres acentuados, espacios y guión medio. p.e. Sánchez-García"/>
               </div>
             </li>
           </ul>
@@ -515,13 +509,13 @@ export class MakeBookingComponent {
             <li class="phone-number">
               <div>
                 <label htmlFor="phone-number">Teléfono</label>
-                <input type="number" id="phone-number" value={this.bookingInfo.phone} onInput={(e) => this.handlePhoneChange(e)} pattern="/^[0-9]{9,9}$/" placeholder="654321123"/>
+                <input type="number" id="phone-number" required value={this.bookingInfo.phone} onInput={(e) => this.handlePhoneChange(e)} pattern="^\d{9,9}$" placeholder="654321123" title="El teléfono únicamente puede contener 9 números, pre. p.e. 654321123"/>
               </div>
             </li>
             <li class="email-address">
               <div>
                 <label htmlFor="email-address">Email</label>
-                <input type="email" id="email-address" value={this.bookingInfo.email} onInput={(e) => this.handleEmailChange(e)} placeholder="you@somewhere.something"/>
+                <input type="email" id="email-address" required value={this.bookingInfo.email} onInput={(e) => this.handleEmailChange(e)} placeholder="you@somewhere.something"/>
               </div>
             </li>
           </ul>
@@ -529,7 +523,9 @@ export class MakeBookingComponent {
               <label htmlFor="special-requests">Solicitud particular</label>
               <input type="text" id="special-requests" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui si tiene alguna solicitud particular."/>
           </div>
-          <input type="submit" class="button-submit" value="Reservar"/>
+          {(this.booking_state == BookingStates.invalid_day) ?
+           <span style={{color: 'white', background: 'red'}}>El restaurante está cerrado hoy, por favor seleccione otra fecha.</span>
+          : <input type="button" class="button-submit" value="Reservar" onClick={this.submitBooking.bind(this)}/>}
         </form>
       </div>
     )
@@ -545,7 +541,6 @@ export class BookingInfo {
   email: string;
   name: string;
   surname: string;
-  phoneChanged: boolean;
   service: string;
 }
 
