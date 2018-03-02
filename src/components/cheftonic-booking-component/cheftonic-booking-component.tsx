@@ -362,16 +362,25 @@ export class MakeBookingComponent {
 
   toggleCalendarShow() {
     this.showCalendar = !this.showCalendar;
+    if (this.showCalendar) {
+      this.showTime = this.showPax = false;
+    }
   }
 
   toggleTimeShow() {
     if (!(this.booking_state == BookingStates.invalid_day)) {
       this.showTime = !this.showTime;
     }
+    if (this.showTime) {
+      this.showCalendar = this.showPax = false;
+    }
   }
 
   togglePaxShow() {
     this.showPax = !this.showPax;
+    if (this.showPax) {
+      this.showCalendar = this.showTime = false;
+    }
   }
 
   submitBooking() {
