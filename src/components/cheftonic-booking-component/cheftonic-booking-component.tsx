@@ -462,7 +462,7 @@ export class MakeBookingComponent {
         {(this.booking_state == BookingStates.invalid_day) && <span style={{color: 'white', background: 'red'}}>El restaurante está cerrado hoy, por favor seleccione otra fecha.</span>}
         <div class="cheftonic-booking-container">
           <div class="submit-booking-col" onClick = {this.togglePaxShow.bind(this)}>
-            <span>{ this.bookingInfo.pax }</span>
+            <span>{ this.bookingInfo.pax.toString().concat ((this.bookingInfo.pax > 1)?' personas':' persona') }</span>
           </div>
           <div class="submit-booking-col" onClick = {this.toggleCalendarShow.bind(this)}>
               <label class="booking-bar-date">{ this.bookingInfo.day.toLocaleDateString(navigator.language, { year: 'numeric', month: 'short', day: 'numeric' }) }</label>
@@ -490,7 +490,7 @@ export class MakeBookingComponent {
               <ul class="pax-list">
                 {[1,2,3,4,5,6,7,8,9,10].map(paxNr =>
                     <li class="item" value={paxNr} onClick = {this.setPax.bind(this)}>
-                      { paxNr }
+                      { paxNr.toString().concat ((paxNr > 1)?' personas':' persona') }
                     </li>
                   )
                 }
