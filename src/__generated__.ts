@@ -59,13 +59,30 @@ export interface BookRequestMutationVariables {
 export interface BookRequestMutation {
   // External Operation - Create book request
   createExtBookRequest:  {
-    // bookRequest ID
-    book_id: string,
     book_date: string,
     made_on: string,
     status: string,
     num_pax: number,
     notes: string | null,
+    restaurant:  {
+      r_name: string,
+      email: string | null,
+      phone: string | null,
+      address:  {
+        country: string,
+        region: string | null,
+        city: string,
+        street: string | null,
+        num: number | null,
+        post_code: string | null,
+      } | null,
+    },
+    person:  {
+      name: string | null,
+      surname: string | null,
+      phone: string | null,
+      email: Array< string | null > | null,
+    },
   } | null,
 };
 

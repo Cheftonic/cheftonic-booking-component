@@ -40,12 +40,30 @@ query RestaurantBookingInfo ($b_r_id: ID!) {
 const CreateBookRequest = gql`
 mutation BookRequest ($booking_info: ExtBookRequestInput!) {
   createExtBookRequest (book_request: $booking_info) {
-    book_id
     book_date
     made_on
     status
     num_pax
     notes
+    restaurant {
+      r_name
+      email
+      phone
+      address {
+        country
+        region
+        city
+        street
+        num
+        post_code
+      }
+    }
+    person {
+      name
+      surname
+      phone
+      email
+    }
   }
 }
 `;
@@ -67,6 +85,7 @@ export class MakeBookingComponent {
 
   // Internal object to represent the data of the booking
   bookingInfo: BookingInfo;
+  confirmedBookingInfo: 
 
   userPhoneValid: Boolean = false;
 
@@ -90,7 +109,7 @@ export class MakeBookingComponent {
   showHourMinute: boolean;
 
   // States of the component
-  booking_state: BookingStates;
+  @State() booking_state: BookingStates;
   phone_required: boolean;
 
   // Restaurant load status
@@ -409,7 +428,7 @@ export class MakeBookingComponent {
         variables: {
           booking_info: bookRequestInput
         }
-      }).then (() => {
+      }).then ((bookig_info) => {
         this.booking_state = BookingStates.submitted_ok;
         console.log ('Booking submitted successfully');
 
@@ -453,7 +472,24 @@ export class MakeBookingComponent {
     if (this.booking_state == BookingStates.invalid_id) {
       return (
         <div>
-          Your Cheftonic web component seems invalid. Please contact us to fix it at cdb@cheftonic.com. Please include this info: apikey = {this.apikey}
+          Parece haber un error de configuración en su componente. Para solucionarlo por favor envíe un correo a cdb@cheftonic.com incluyendo sus datos y esta información: apikey = {this.apikey}
+        </div>
+      )
+    }
+    if (this.booking_state == BookingStates.submitted_ok) {
+      return (
+        <div class="animate-bottom">
+          <span>Su reserva se ha realizado correctamente. Recibirá un email con el acuse de recibo y ahora el restaurante deberá aceptar su reserva, tras lo cual recibirá otro email de confirmación.</span>
+          <span>Muchas gracias por confiar en nosotros.</span>
+          <input type="button" class="button-reset" value="Realizar otra reserva" onClick={()=>this.booking_state = BookingStates.not_submitted}/>
+        </div>
+      )
+    }
+    if (this.booking_state == BookingStates.submitting) {
+      return (
+        <div>
+          <div id="loader"></div>
+          Enviando su solicitud...
         </div>
       )
     }
@@ -532,6 +568,8 @@ export class MakeBookingComponent {
               <label htmlFor="special-requests">Solicitud particular</label>
               <input type="text" id="special-requests" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui si tiene alguna solicitud particular."/>
           </div>
+          {(this.booking_state == BookingStates.submitted_ko) && <span style={{color: 'white', background: 'red'}}>Se ha producido un error al enviar su reserva, haga clicks abajo lo mas rapido posible para ver si se desatasca.</span>}
+          
           {(this.booking_state == BookingStates.invalid_day) ?
            <span style={{color: 'white', background: 'red'}}>El restaurante está cerrado hoy, por favor seleccione otra fecha.</span>
           : <input type="button" class="button-submit" value="Reservar" onClick={this.submitBooking.bind(this)}/>}
