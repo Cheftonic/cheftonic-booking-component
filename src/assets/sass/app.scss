@@ -4,7 +4,7 @@
 
 .cheftonic-booking-container {
   display: grid;
-  grid-template-areas: 'date date time time pax pax';
+  grid-template-areas: 'pax date time';
   grid-gap: 0;
   position: relative;
 
@@ -261,6 +261,7 @@
     li {
       height: 30px;
       line-height: 30px;
+      width:50%;
       padding: 5px;
       margin: 0;
       border-bottom: thin solid rgba(0,0,0,0.2);
