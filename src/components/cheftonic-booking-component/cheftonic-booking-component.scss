@@ -2,46 +2,84 @@
     margin: 10px;
 }
 
-.cheftonic-booking-container {
-  display: grid;
-  grid-template-areas: 'pax date time';
-  grid-gap: 0;
-  position: relative;
+@media (min-width: 480px) {
+  .cheftonic-booking-container {
+      display: grid;
+      grid-gap: 0;
+      grid-template-areas: 'pax date time';
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto 1fr auto;
+      position: relative;
+  }
+  .cheftonic-details-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto;
+  }
+  .cheftonic-booking-container div {
+    border: 1px solid rgba(0,0,0,0.2);
+    border-right-width: 0;
+    border-bottom:0;
+    &:last-child {
+      border-right-width: 1px;
+    }
+  }
+  .cheftonic-details-container div {
+    border: 1px solid rgba(0,0,0,0.2);
+    border-bottom:0;
+    &:nth-child(odd) {
+      border-right-width: 0;
+    }
+    &.special-requests {
+      border-right-width: 1px;
+    }
+  }
+}
 
+@media (max-width: 480px) {
+  .cheftonic-booking-container div,  .cheftonic-details-container div {
+    border: 1px solid rgba(0,0,0,0.2);
+    border-bottom:0;
+  }
+}
+.cheftonic-details-container div:last-child {
+  border-bottom:1px solid rgba(0,0,0,0.2);
+}
+.special-requests, .button-submit, .logo, .error-message {
+    grid-column: span 2;
+}
+.logo {
+    border:0 !important;
+}
+
+
+.cheftonic-booking-container {
   > div {
     margin: 0;
     line-height: 1.43;
     font-size: 19px;
     padding: 10px 5px;
     cursor: pointer;
-
     &:hover {
       background: rgba(0,0,0,0.05);
     }
-
     label {
       cursor: pointer;
     }
   }
-
   .invalid-text {
     border: 2px solid red;
   }
-
   .error-text {
     font-size: medium;
     margin: 0;
     color: red;
   }
-
   .man-text {
     font-size: 3rem;
   }
-
   .submit-booking-col {
     display:flex;
-    border: thin solid rgba(0,0,0,0.2);
-    border-right: 0;
     text-align: left;
     span.icon {
       display:block;
@@ -50,11 +88,9 @@
       padding-left:5px;
       padding-right:5px;
     }
-    &:last-child {
-      border-right: thin solid rgba(0,0,0,0.2);
-    }
   }
 }
+
 
 
 /* PEOPLE STYLING */
@@ -190,51 +226,9 @@
       line-height:40px;
       background-color: orange;
     }
-    .dayAndTime {
-    }
-    .weekDay {
-    }
-    .month {
-    }
-    .day {
-    }
   }
-
-
-
-
-  .calendar {
-  }
-
-  .calendarTitle {
-  }
-
-  .calendarYear {
-  }
-
-  .fullWidth {
-  }
-
-  .date-small {
-  }
-
-  .weekDay-small {
-  }
-
-  .month-small {
-  }
-
   .day-disabled {
     color:lightgrey;
-  }
-
-  .calendar-small {
-  }
-
-  .calendarTitle-small {
-  }
-
-  .calendarYear-small {
   }
 }
 
@@ -278,39 +272,25 @@
 }
 
 /* Customer details */
-.customer-details {
+.cheftonic-details-container {
   font-size: 16px;
-  .contact-details {
+  > div {
+    padding-left: 5px;
+  }
+  .form-control {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
     align-items: center;
-    list-style-type: none;
-    padding:0;
-    margin:0;
-    li {
-      border:1px solid rgba(0,0,0,0.2);
-      border-top: 0;
-      line-height:30px;
-      padding-left: 5px;
-      flex-grow: 1;
-      border-collapse: collapse;
-      div {
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-      label {
-        padding-right:3px;
-      }
-      input {
-        flex-grow:2;
-        align-self:center;
-        /* Text alignment fix */
-        border: 1px solid white;
-      }
-    }
+  }
+  label {
+    padding-right:3px;
+  }
+  input {
+    flex-grow:2;
+    align-self:center;
+    /* Text alignment fix */
+    border: 1px solid white;
   }
   .special-requests {
     display: flex;
@@ -318,8 +298,6 @@
     flex-wrap: wrap;
     align-items: center;
     padding-left: 5px;
-    border-left:1px solid rgba(0,0,0,0.2);
-    border-right:1px solid rgba(0,0,0,0.2);
     label {
       padding-right:3px;
     }
@@ -376,12 +354,12 @@
 }
 
 @-webkit-keyframes animatebottom {
-  from { bottom:-100px; opacity:0 } 
+  from { bottom:-100px; opacity:0 }
   to { bottom:0px; opacity:1 }
 }
 
-@keyframes animatebottom { 
-  from{ bottom:-100px; opacity:0 } 
+@keyframes animatebottom {
+  from{ bottom:-100px; opacity:0 }
   to{ bottom:0; opacity:1 }
 }
 

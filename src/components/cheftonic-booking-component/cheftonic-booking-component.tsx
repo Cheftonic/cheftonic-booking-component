@@ -514,19 +514,6 @@ export class MakeBookingComponent {
           </div>
         </div>
 
-        {(this.showCalendar) &&
-          <div id="booking-cal-container" class="calendar-container">
-            { this._daySelector.renderCalendar() }
-          </div>
-        }
-
-        {(this.showTime) &&
-          <div id="booking-time-container" class="time-container">
-            <div class="time_box">
-              { this._timeSelector.renderHourMinute() }
-            </div>
-          </div>
-        }
 
         {(this.showPax) &&
           <div id="booking-pax-container" class="people-container">
@@ -543,43 +530,53 @@ export class MakeBookingComponent {
           </div>
         }
 
-        <form class="customer-details">
-        <ul class="contact-details">
-            <li class="name">
-              <div>
-                <label htmlFor="name">Nombre:</label>
-                <input type="text" id="name" required value={this.bookingInfo.name} onInput={(e) => this.handleNameChange(e)} pattern="[A-zÀ-ú ]{3,20}$" placeholder="Alfonso" title="El nombre únicamente puede contener entre 3 y 20 caracteres mayúsculas, minúsculas, caracteres acentuados y espacios. p.e. Alfonso Víctor"/>
-              </div>
-            </li>
-            <li class="surname">
-              <div>
-                <label htmlFor="surname">Apellido:</label>
-                <input type="text" id="surname" required value={this.bookingInfo.surname} onInput={(e) => this.handleSurnameChange(e)}  pattern="[A-zÀ-ú  -]{3,20}" placeholder="García" title="El apellido únicamente puede contener entre 3 y 20 caracteres mayúsculas, minúsculas, caracteres acentuados, espacios y guión medio. p.e. Sánchez-García"/>
-              </div>
-            </li>
-          </ul>
-          <ul class="contact-details">
-            <li class="phone-number">
-              <div>
-                <label htmlFor="phone-number">Teléfono:</label>
-                <input type="number" id="phone-number" required value={this.bookingInfo.phone} onInput={(e) => this.handlePhoneChange(e)} pattern="^\d{9,9}$" placeholder="654321123" title="El teléfono únicamente puede contener 9 números, pre. p.e. 654321123"/>
-              </div>
-            </li>
-            <li class="email-address">
-              <div>
-                <label htmlFor="email-address">Email:</label>
-                <input type="email" id="email-address" required value={this.bookingInfo.email} onInput={(e) => this.handleEmailChange(e)} placeholder="you@somewhere.something"/>
-              </div>
-            </li>
-          </ul>
+        {(this.showCalendar) &&
+          <div id="booking-cal-container" class="calendar-container">
+            { this._daySelector.renderCalendar() }
+          </div>
+        }
+
+        {(this.showTime) &&
+          <div id="booking-time-container" class="time-container">
+            <div class="time_box">
+              { this._timeSelector.renderHourMinute() }
+            </div>
+          </div>
+        }
+
+        <form class="cheftonic-details-container">
+          <div class="name">
+            <span class="form-control">
+              <label htmlFor="name">Nombre:</label>
+              <input type="text" id="name" required value={this.bookingInfo.name} onInput={(e) => this.handleNameChange(e)} pattern="[A-zÀ-ú ]{3,20}$" placeholder="Alfonso" title="El nombre únicamente puede contener entre 3 y 20 caracteres mayúsculas, minúsculas, caracteres acentuados y espacios. p.e. Alfonso Víctor"/>
+            </span>
+          </div>
+          <div class="surname">
+            <span class="form-control">
+              <label htmlFor="surname">Apellido:</label>
+              <input type="text" id="surname" required value={this.bookingInfo.surname} onInput={(e) => this.handleSurnameChange(e)}  pattern="[A-zÀ-ú  -]{3,20}" placeholder="García" title="El apellido únicamente puede contener entre 3 y 20 caracteres mayúsculas, minúsculas, caracteres acentuados, espacios y guión medio. p.e. Sánchez-García"/>
+            </span>
+          </div>
+          <div class="phone-number">
+            <span class="form-control">
+              <label htmlFor="phone-number">Teléfono:</label>
+              <input type="number" id="phone-number" required value={this.bookingInfo.phone} onInput={(e) => this.handlePhoneChange(e)} pattern="^\d{9,9}$" placeholder="654321123" title="El teléfono únicamente puede contener 9 números, pre. p.e. 654321123"/>
+            </span>
+          </div>
+          <div class="email-address">
+            <span class="form-control">
+              <label htmlFor="email-address">Email:</label>
+              <input type="email" id="email-address" required value={this.bookingInfo.email} onInput={(e) => this.handleEmailChange(e)} placeholder="you@somewhere.something"/>
+            </span>
+          </div>
           <div class="special-requests">
               <label htmlFor="special-requests">Solicitud particular:</label>
               <input type="text" id="special-requests" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui si tiene alguna solicitud particular."/>
           </div>
-          {(this.booking_state == BookingStates.submitted_ko) && <span style={{color: 'white', background: 'red'}}>Se ha producido un error al enviar su reserva, haga clicks abajo lo mas rapido posible para ver si se desatasca.</span>}
-          
+          {(this.booking_state == BookingStates.submitted_ko) && <span class="error-message">Se ha producido un error al enviar su reserva, haga clicks abajo lo mas rapido posible para ver si se desatasca.</span>}
+
           {(this.booking_state == BookingStates.invalid_day) ?
-           <span style={{color: 'white', background: 'red'}}>El restaurante está cerrado hoy, por favor seleccione otra fecha.</span>
+           <span class="error-message">El restaurante está cerrado hoy, por favor seleccione otra fecha.</span>
           : <input type="button" class="button-submit" value="Reservar" onClick={this.submitBooking.bind(this)}/>}
 
           <div class="logo">
