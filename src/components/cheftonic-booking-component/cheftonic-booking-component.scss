@@ -3,6 +3,8 @@ $primary-color:       #00A97E;
 $secondary-color:     #3498db;
 $border-color:        lightgrey;
 $fontface:            Arial, sans-serif;
+$font-size-xl:        32px;
+$font-size-lg:        24px;
 $font-size:           19px;
 $font-size-sm:        16px;
 $font-size-xs:        14px;
@@ -431,14 +433,34 @@ $popup-height:        315px;
       padding-top:15px;
       padding-bottom:15px;
       color:white;
+      .people {
+        font-size: $font-size-lg;
+        margin:10px 0;
+      }
+      .restaurant {
+        font-weight: 700;
+        display:block;
+        margin:10px 0;
+        font-size: $font-size-xl;
+      }
+      .reservation {
+        font-weight: 300;
+        .date {
+          font-size: $font-size-lg;
+        }
+        .time {
+          font-size: $font-size-lg;
+        }
+      }
       svg {
-        width:40px;
-        height:40px;
+        width:60px;
+        height:60px;
       }
     }
     p {
       padding-left:10px;
       padding-right:10px;
+      margin-top: 10px;
     }
     .animate-bottom {
       position: relative;
