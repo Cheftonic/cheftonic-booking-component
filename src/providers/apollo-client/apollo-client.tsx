@@ -3,22 +3,6 @@ import { HttpLink } from 'apollo-link-http';
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { ApolloLink } from 'apollo-link';
 
-/*
-import { withClientState } from 'apollo-link-state';
-import { ViewPage } from '../../models/last-view-page.model'
-import gql from 'graphql-tag'
-
-export const getLastViewPage = gqlll`
-      query getLastViewPage {
-        lastViewPage @client {
-          __typename
-          lastViewPage
-          pageData
-        }
-      }
-    `
-*/
-
 export class ApolloClientProvider {
 
   apollo: ApolloClient <NormalizedCacheObject>;
@@ -34,25 +18,17 @@ export class ApolloClientProvider {
     console.log('Hello ApolloClientProvider INIT');
 
     const cache = new InMemoryCache ({
-      // fragmentMatcher: // matcher,
       dataIdFromObject: (object: any) => {
-        // TODO: Probably will be down to the object property which ends with '_id'
         switch (object.__typename) {
-          case 'Person': return object.p_id;
-          case 'Business': return object.b_id;
           case 'Restaurant': return object.b_r_id;
-          case 'Customer': return object.email;
           case 'MasterData': return object.opt_id + '.' + object.lang;
-          // default: return object.id || object._id;
         }
       },
       addTypename: true,
-      // cacheResolvers: // cache resolvers
     }).restore({});
 
     const httpLink = new HttpLink ({ 
-       uri: 'https://apidev.cheftonic.com/dev/chftqry'
-      // uri: 'http://localhost:3000/chftqry' 
+       uri: 'https://api.cheftonic.com/prod/chftqry'
     });
 
 
@@ -65,35 +41,8 @@ export class ApolloClientProvider {
       });
     });
 
-    /*const stateLink = withClientState({
-      cache,
-      resolvers: {
-        Query: {
-          // provide initial state
-          lastViewPage: () => <ViewPage> {
-            __typename: 'LastViewPage',
-            lastViewPage: 'page-restaurants',
-            pageData: {}
-          },
-        },
-        Mutation: {
-          updateLastViewPage: (_, { page, pageData }, { cache }) => {
-            cache.writeQuery({
-              query: getLastViewPage,
-              data: {
-                lastViewPage: page,
-                pageData: JSON.stringify(pageData)
-              },
-            })
-            return cache.readQuery ({ query: getLastViewPage })
-          },
-        },
-      },
-    });*/
-
     const cheftonicLink = ApolloLink.from ([
       cleanTypenameLink,
-      // stateLink,
       httpLink
     ]);
 
