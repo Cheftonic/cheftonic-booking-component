@@ -237,7 +237,7 @@ export class Calendar {
 
   renderCalendar() {
     return (
-      <div class="calendar_box">
+      <div class="calendar_box popup">
         <div class="calendar_header">
           <div class="calendar_nav--prev">
             <button type="button"

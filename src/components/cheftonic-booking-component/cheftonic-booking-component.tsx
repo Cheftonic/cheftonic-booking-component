@@ -521,7 +521,7 @@ export class MakeBookingComponent {
 
         {(this.showPax) &&
           <div id="booking-pax-container" class="people-container">
-            <div class="people_box">
+            <div class="people_box popup">
               <ul class="pax-list">
                 {[1,2,3,4,5,6,7,8,9,10].map(paxNr =>
                     <li class="item" value={paxNr} onClick = {this.setPax.bind(this)}>
@@ -542,7 +542,7 @@ export class MakeBookingComponent {
 
         {(this.showTime) &&
           <div id="booking-time-container" class="time-container">
-            <div class="time_box">
+            <div class="time_box popup">
               { this._timeSelector.renderHourMinute() }
             </div>
           </div>

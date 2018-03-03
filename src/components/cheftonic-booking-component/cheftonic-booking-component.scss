@@ -8,13 +8,12 @@ $font-size-lg:        24px;
 $font-size:           19px;
 $font-size-sm:        16px;
 $font-size-xs:        14px;
-
 $button-hover-color:  lightgrey;
 $background-color:    white;
 $padding:             5px;
 $logo-width:          50px;
 $logo-height:         16px;
-$popup-height:        315px;
+$popup-height:        320px;
 
 
 
@@ -77,6 +76,40 @@ $popup-height:        315px;
 }
 
 
+/* Popup */
+.popup {
+  position: absolute;
+  overflow-y: auto;
+  max-height: $popup-height;
+  margin:0;
+  padding:0;
+  display: block;
+  background-color: $background-color;
+  border: 1px solid $border-color;
+  border-radius: 3px 3px 3px 3px;
+  .calendar_header:before, .calendar_header:after {
+      border-style: solid;
+      border-width: 8px;
+      border-color: #fff transparent transparent #fff;
+      width: 0;
+      height: 0;
+      background: transparent;
+      box-shadow: -1px -1px 0 0 rgba(0,0,0,.15);
+      transform: rotate(45deg);
+      animation: fadeIn .25s;
+      animation-fill-mode: both;
+  }
+  .calendar_header:before, .calendar_header:after {
+      content: "";
+      display: block;
+      position: absolute;
+      margin-left: -10px;
+      z-index: 100;
+  }
+}
+
+
+
 .cheftonic-booking-container {
   > div {
     margin: 0;
@@ -127,18 +160,9 @@ $popup-height:        315px;
   position: relative;
 }
 .people_box {
-  position: absolute;
-  overflow-y: auto;
+  width: 100px;
   top: -10px;
   left: 10px;
-  height: $popup-height;
-  width: 100px;
-  margin:0;
-  padding:0;
-  display: block;
-  background-color: $background-color;
-  border: 1px solid $border-color;
-  border-radius: 3px 3px 3px 3px;
   .pax-list {
     list-style-type: none;
     padding: 0;
@@ -168,22 +192,16 @@ $popup-height:        315px;
 }
 
 .calendar_box {
-  position: absolute;
-  overflow-y: scroll;
-  height: $popup-height;
   width: 300px;
   margin-left: auto;
   margin-right: auto;
   left: 0;
   right: 0;
   top: -10px;
-  padding: $padding;
-  display: block;
-  background-color: $background-color;
-  border: 1px solid $border-color;
-  border-radius: 3px 3px 3px 3px;
   .calendar_header {
     display: flex;
+    border-bottom: 1px solid $border-color;
+    margin: 5px 10px 0;
     div {
       flex-grow: 1;
       flex-shrink: 1;
@@ -273,18 +291,9 @@ $popup-height:        315px;
   position: relative;
 }
 .time_box {
-  position: absolute;
-  overflow-y: scroll;
+  width: 100px;
   top: -10px;
   right: 10px;
-  height: $popup-height;
-  width: 100px;
-  margin: 0;
-  padding: 0;
-  display: block;
-  background-color: $background-color;
-  border: 1px solid $border-color;
-  border-radius: 3px 3px 3px 3px;
   .time-list {
     list-style-type: none;
     padding: 0;
@@ -309,14 +318,12 @@ $popup-height:        315px;
 /* Customer details */
 .cheftonic-details-container {
   font-size: $font-size-sm;
-  > div {
-    padding-left: $padding;
-  }
   .form-control {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
     align-items: center;
+    padding-left: $padding;
   }
   label {
     padding-right:3px;
