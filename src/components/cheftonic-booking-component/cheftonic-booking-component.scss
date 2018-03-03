@@ -1,12 +1,18 @@
 // Variables
+$primary-color:       #00A97E;
 $border-color:        lightgrey;
 $fontface:            Arial, sans-serif;
+$font-size:           19px;
+$font-size-sm:        16px;
+$font-size-xs:        14px;
+
 $button-hover-color:  lightgrey;
 $background-color:    white;
 $padding:             5px;
 $logo-width:          50px;
 $logo-height:         16px;
 $popup-height:        315px;
+
 
 
 .cheftonic-booking-wrapper {
@@ -72,7 +78,7 @@ $popup-height:        315px;
   > div {
     margin: 0;
     line-height: 1.43;
-    font-size: 19px;
+    font-size: $font-size;
     padding: 10px $padding;
     cursor: pointer;
     &:hover {
@@ -86,12 +92,12 @@ $popup-height:        315px;
     border: 2px solid red;
   }
   .error-text {
-    font-size: medium;
+    font-size: $font-size;
     margin: 0;
     color: red;
   }
   .man-text {
-    font-size: 3rem;
+    font-size: $font-size;
   }
   .submit-booking-col {
     display:flex;
@@ -180,14 +186,14 @@ $popup-height:        315px;
       text-align: left;
     }
     .calendar_month {
-      font-size: 14px;
+      font-size: $font-size-xs;
       font-weight: 300;
       text-align: right;
       padding-right: 2px;
       line-height: 45px;
     }
     .calendar_year {
-      font-size: 14px;
+      font-size: $font-size-xs;
       font-weight: 300;
       text-align: left;
       padding-left: 2px;
@@ -202,7 +208,7 @@ $popup-height:        315px;
       border:0;
       border-radius: 20px 20px 20px 20px;
       line-height:40px;
-      font-size: 19px;
+      font-size: $font-size;
       cursor: pointer;
       &:hover{
         background-color: $button-hover-color;
@@ -217,7 +223,7 @@ $popup-height:        315px;
       text-align: center;
       vertical-align: middle;
       height:40px;
-      font-size: 16px;
+      font-size: $font-size-sm;
       font-weight: 300;
     }
     td {
@@ -227,7 +233,7 @@ $popup-height:        315px;
       font-weight: normal;
     }
     .active {
-      font-size: 19px;
+      font-size: $font-size;
       cursor: pointer;
       border-radius: 20px 20px 20px 20px;
       line-height:40px;
@@ -236,7 +242,7 @@ $popup-height:        315px;
       }
     }
     .activeselectedButton {
-      font-size: 19px;
+      font-size: $font-size;
       font-weight: bold;
       cursor: pointer;
       border-radius: 20px 20px 20px 20px;
@@ -291,7 +297,7 @@ $popup-height:        315px;
 
 /* Customer details */
 .cheftonic-details-container {
-  font-size: 16px;
+  font-size: $font-size-sm;
   > div {
     padding-left: $padding;
   }
@@ -303,6 +309,7 @@ $popup-height:        315px;
   }
   label {
     padding-right:3px;
+    min-width: 80px;
   }
   input {
     flex-grow:2;
@@ -329,7 +336,7 @@ $popup-height:        315px;
     border-bottom: 0;
   }
   input {
-    font-size: 16px;
+    font-size: $font-size-sm;
     border:0;
     line-height:28px;
     /* Text alignment fix */
@@ -355,9 +362,9 @@ $popup-height:        315px;
 .button-submit {
   border:0;
   width:100%;
-  background: #00A97E;
+  background: $primary-color;
   color:$background-color;
-  font-size:19px;
+  font-size:$font-size;
   text-align: center;
   padding:0 15px;
   height:50px;
@@ -385,11 +392,12 @@ $popup-height:        315px;
   position: absolute;
   left: 50%;
   top: 50%;
+  transform: translate(-50%, -50%);
   z-index: 1;
   width: 150px;
   height: 150px;
   margin: -75px 0 0 -75px;
-  border: 16px solid #f3f3f3;
+  border: 16px solid $border-color;
   border-radius: 50%;
   border-top: 16px solid #3498db;
   width: 120px;
