@@ -476,18 +476,22 @@ export class MakeBookingComponent {
     }
     if (this.booking_state == BookingStates.submitted_ok) {
       return (
-        <div class="animate-bottom">
-          <span>Su reserva se ha realizado correctamente. Recibirá un email con el acuse de recibo y ahora el restaurante deberá aceptar su reserva, tras lo cual recibirá otro email de confirmación.</span>
-          <span>Muchas gracias por confiar en nosotros.</span>
-          <input type="button" class="button-reset" value="Realizar otra reserva" onClick={()=>this.booking_state = BookingStates.not_submitted}/>
+        <div class="confirm animate-bottom">
+          <div class="header">
+            <svg viewBox="0 0 30 30"  xmlns="http://www.w3.org/2000/svg"><g fill="#FFFFFF" fill-rule="evenodd"><path d="m7.8579 16.4645c-.391-.391-.391-1.024 0-1.414.391-.391 1.024-.391 1.414 0l3.536 3.535 8.485-8.485c.391-.39 1.024-.39 1.414 0 .391.391.391 1.024 0 1.414l-9.192 9.193c-.391.39-1.024.39-1.414 0z"/><path d="m15 29c-7.732 0-14-6.268-14-14s6.268-14 14-14 14 6.268 14 14-6.268 14-14 14m0-29c-8.284 0-15 6.716-15 15s6.716 15 15 15 15-6.716 15-15-6.716-15-15-15"/></g></svg>
+            <p>Su reserva se ha realizado correctamente.</p>
+          </div>
+            <p>Recibirá un email con el acuse de recibo y ahora el restaurante deberá aceptar su reserva, tras lo cual recibirá otro email de confirmación.</p>
+            <p>Muchas gracias por confiar en nosotros.</p>
+            <input type="button" class="button-reset" value="Realizar otra reserva" onClick={()=>this.booking_state = BookingStates.not_submitted}/>
         </div>
       )
     }
     if (this.booking_state == BookingStates.submitting) {
       return (
-        <div>
-          <div id="loader"></div>
-          Enviando su solicitud...
+        <div class="loader">
+          <div class="notice">Enviando su solicitud...</div>
+          <div id="loader" class="animation"></div>
         </div>
       )
     }

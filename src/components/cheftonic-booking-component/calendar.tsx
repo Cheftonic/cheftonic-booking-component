@@ -67,7 +67,7 @@ export class Calendar {
       this.masterData.getMasterDataInfo(MasterDataKeys.MONTHS)
     ])
   }
-  
+
   async setConfig (calConfig: CalendarConfig) {
     console.log ('Setting calendar to this config: ' + JSON.stringify(calConfig, null, 2));
     this.calendarConfig = calConfig;
@@ -80,7 +80,7 @@ export class Calendar {
       this.selectedYear = this.calendarConfig.dateFrom.getFullYear();
       // Reset parsedDates and generate new dates
       this.parsedDates = {monthName: '', week: [{day: new Array<CalendarDay>()}]};
-      
+
       this.initCalendar();
     }
   }
@@ -241,14 +241,16 @@ export class Calendar {
         <div class="calendar_header">
           <div class="calendar_nav--prev">
             <button type="button"
-              onClick = {this.previousMonth.bind(this)}>&lt;
+              onClick = {this.previousMonth.bind(this)}>
+              <svg height="10" viewBox="0 0 56 100" width="5.6" xmlns="http://www.w3.org/2000/svg"><path d="m45.6195417 76.1916897-43.80544294-43.6532449c-2.41879835-2.4103944-2.41879835-6.3195686 0-8.730649 2.41948667-2.4103944 6.34229025-2.4103944 8.76108864 0l39.4248986 39.2879204 39.4248987-39.2879204c2.4187984-2.4103944 6.3416019-2.4103944 8.7604003 0 2.419487 2.4110804 2.419487 6.3202546 0 8.730649l-43.8047547 43.6532449c-2.4194866 2.4110804-6.3416019 2.4110804-8.7610886 0" fill="#231f20" fill-rule="evenodd" transform="matrix(0 1 -1 0 78 0)"/></svg>
             </button>
           </div>
           <div class="calendar_month">{ this.parsedDates.monthName }</div>
           <div class="calendar_year">{ this.selectedYear }</div>
           <div class="calendar_nav--next">
             <button ion-button icon-only type="button"
-              onClick = {this.nextMonth.bind(this)}>&gt;
+              onClick = {this.nextMonth.bind(this)}>
+              <svg height="10" viewBox="0 0 56 100" width="5.6" xmlns="http://www.w3.org/2000/svg"><path d="m45.6195417 76.1916897-43.80544294-43.6532449c-2.41879835-2.4103944-2.41879835-6.3195686 0-8.730649 2.41948667-2.4103944 6.34229025-2.4103944 8.76108864 0l39.4248986 39.2879204 39.4248987-39.2879204c2.4187984-2.4103944 6.3416019-2.4103944 8.7604003 0 2.419487 2.4110804 2.419487 6.3202546 0 8.730649l-43.8047547 43.6532449c-2.4194866 2.4110804-6.3416019 2.4110804-8.7610886 0" fill="#231f20" fill-rule="evenodd" transform="matrix(0 -1 1 0 -22 100)"/></svg>
             </button>
           </div>
         </div>
