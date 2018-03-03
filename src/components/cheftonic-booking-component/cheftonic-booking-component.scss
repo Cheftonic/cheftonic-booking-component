@@ -1,3 +1,13 @@
+// Variables
+$border-color:        lightgrey;
+$fontface:            Arial, sans-serif;
+$button-hover-color:  lightgrey;
+$background-color:    white;
+$padding:             5px;
+$logo-width:          50px;
+$logo-height:         16px;
+
+
 .cheftonic-booking-wrapper {
     margin: 10px;
 }
@@ -17,7 +27,7 @@
       grid-template-rows: auto;
   }
   .cheftonic-booking-container div {
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 1px solid $border-color;
     border-right-width: 0;
     border-bottom:0;
     &:last-child {
@@ -25,7 +35,7 @@
     }
   }
   .cheftonic-details-container div {
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 1px solid $border-color;
     border-bottom:0;
     &:nth-child(odd) {
       border-right-width: 0;
@@ -38,18 +48,22 @@
 
 @media (max-width: 480px) {
   .cheftonic-booking-container div,  .cheftonic-details-container div {
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 1px solid $border-color;
     border-bottom:0;
   }
 }
 .cheftonic-details-container div:last-child {
-  border-bottom:1px solid rgba(0,0,0,0.2);
+  border-bottom:1px solid $border-color;
 }
 .special-requests, .button-submit, .logo, .error-message {
     grid-column: span 2;
 }
 .logo {
     border:0 !important;
+    svg {
+      width:$logo-width;
+      height:$logo-height;
+    }
 }
 
 
@@ -58,10 +72,10 @@
     margin: 0;
     line-height: 1.43;
     font-size: 19px;
-    padding: 10px 5px;
+    padding: 10px $padding;
     cursor: pointer;
     &:hover {
-      background: rgba(0,0,0,0.05);
+      background: $button-hover-color;
     }
     label {
       cursor: pointer;
@@ -85,8 +99,8 @@
       display:block;
       flex-grow: 1;
       text-align: right;
-      padding-left:5px;
-      padding-right:5px;
+      padding-left:$padding;
+      padding-right:$padding;
     }
   }
 }
@@ -107,8 +121,8 @@
   margin:0;
   padding:0;
   display: block;
-  background-color: white;
-  border: 1px solid rgba(0,0,0,0.2);
+  background-color: $background-color;
+  border: 1px solid $border-color;
   border-radius: 3px 3px 3px 3px;
   .pax-list {
     list-style-type: none;
@@ -117,15 +131,15 @@
     li {
       height: 30px;
       line-height: 30px;
-      padding: 5px;
+      padding: $padding;
       margin: 0;
-      border-bottom: thin solid rgba(0,0,0,0.2);
+      border-bottom: thin solid $border-color;
       cursor: pointer;
       &:last-child {
         border-bottom: 0;
       }
       &:hover {
-        background: rgba(0,0,0,0.05);
+        background: $button-hover-color;
       }
     }
   }
@@ -147,10 +161,10 @@
   left: 0;
   right: 0;
   top: -10px;
-  padding: 5px;
+  padding: $padding;
   display: block;
-  background-color: white;
-  border: 1px solid rgba(0,0,0,0.2);
+  background-color: $background-color;
+  border: 1px solid $border-color;
   border-radius: 3px 3px 3px 3px;
   .calendar_header {
     display: flex;
@@ -188,7 +202,7 @@
       font-size: 19px;
       cursor: pointer;
       &:hover{
-        background-color: rgba(0,0,0,0.05);
+        background-color: $button-hover-color;
       }
     }
   }
@@ -215,7 +229,7 @@
       border-radius: 20px 20px 20px 20px;
       line-height:40px;
       &:hover{
-        background-color: rgba(0,0,0,0.05);
+        background-color: $button-hover-color;
       }
     }
     .activeselectedButton {
@@ -247,8 +261,8 @@
   margin: 0;
   padding: 0;
   display: block;
-  background-color: white;
-  border: 1px solid rgba(0,0,0,0.2);
+  background-color: $background-color;
+  border: 1px solid $border-color;
   border-radius: 3px 3px 3px 3px;
   .time-list {
     list-style-type: none;
@@ -257,15 +271,15 @@
     li {
       height: 30px;
       line-height: 30px;
-      padding: 5px;
+      padding: $padding;
       margin: 0;
-      border-bottom: thin solid rgba(0,0,0,0.2);
+      border-bottom: thin solid $border-color;
       cursor: pointer;
       &:last-child {
         border-bottom: 0;
       }
       &:hover {
-        background: rgba(0,0,0,0.05);
+        background: $button-hover-color;
       }
     }
   }
@@ -275,7 +289,7 @@
 .cheftonic-details-container {
   font-size: 16px;
   > div {
-    padding-left: 5px;
+    padding-left: $padding;
   }
   .form-control {
     display: flex;
@@ -289,15 +303,13 @@
   input {
     flex-grow:2;
     align-self:center;
-    /* Text alignment fix */
-    border: 1px solid white;
   }
   .special-requests {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
     align-items: center;
-    padding-left: 5px;
+    padding-left: $padding;
     label {
       padding-right:3px;
     }
@@ -305,7 +317,7 @@
       flex-grow:2;
       align-self:center;
       /* Text alignment fix */
-      border-bottom: 1px solid white;
+      border-bottom: 1px solid $background-color;
     }
   }
   .text {
@@ -316,29 +328,34 @@
     font-size: 16px;
     border:0;
     line-height:28px;
+    /* Text alignment fix */
+    margin-bottom: 1px;
   }
 }
 
 .error-message {
   color:red;
   display:block;
-  padding:5px;
-  border-left:1px solid rgba(0,0,0,0.2);
-  border-right:1px solid rgba(0,0,0,0.2);
-  border-top:1px solid rgba(0,0,0,0.2);
+  padding:$padding;
+  border-left:1px solid $border-color;
+  border-right:1px solid $border-color;
+  border-top:1px solid $border-color;
 }
 
 .logo {
-  padding-top:5px;
+  padding-top:$padding;
   width: 100%;
   text-align: right;
+  svg {
+    margin-right:$padding;
+  }
 }
 
 .button-submit {
   border:0;
   width:100%;
   background: #00A97E;
-  color:white;
+  color:$background-color;
   font-size:19px;
   text-align: center;
   padding:0 15px;
