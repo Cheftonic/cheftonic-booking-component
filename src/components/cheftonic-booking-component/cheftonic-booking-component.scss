@@ -6,6 +6,7 @@ $background-color:    white;
 $padding:             5px;
 $logo-width:          50px;
 $logo-height:         16px;
+$popup-height:        315px;
 
 
 .cheftonic-booking-wrapper {
@@ -114,9 +115,10 @@ $logo-height:         16px;
 }
 .people_box {
   position: absolute;
+  overflow-y: auto;
   top: -10px;
   left: 10px;
-  height: auto;
+  height: $popup-height;
   width: 100px;
   margin:0;
   padding:0;
@@ -154,7 +156,8 @@ $logo-height:         16px;
 
 .calendar_box {
   position: absolute;
-  height: auto;
+  overflow-y: scroll;
+  height: $popup-height;
   width: 300px;
   margin-left: auto;
   margin-right: auto;
@@ -254,9 +257,10 @@ $logo-height:         16px;
 }
 .time_box {
   position: absolute;
+  overflow-y: scroll;
   top: -10px;
   right: 10px;
-  height: auto;
+  height: $popup-height;
   width: 100px;
   margin: 0;
   padding: 0;
@@ -345,10 +349,7 @@ $logo-height:         16px;
 .logo {
   padding-top:$padding;
   width: 100%;
-  text-align: right;
-  svg {
-    margin-right:$padding;
-  }
+  text-align: left;
 }
 
 .button-submit {
