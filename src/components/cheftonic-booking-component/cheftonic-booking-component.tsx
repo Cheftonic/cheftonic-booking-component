@@ -382,6 +382,13 @@ export class MakeBookingComponent {
   }
 
   async submitBooking() {
+    // Select form and force HTML5 validation
+    const f = (document.getElementsByTagName('cheftonic-booking-component')[0].shadowRoot.childNodes[1] as Document).getElementsByTagName('form')[0]
+
+    if(! f.reportValidity()) {
+      return false;
+    } 
+
     // Check if the phone has been filled correctly
     this.booking_state = BookingStates.submitting;
     // Build the BookingInput object
