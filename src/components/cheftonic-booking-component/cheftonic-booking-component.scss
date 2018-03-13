@@ -3,6 +3,7 @@ $primary-color:       #00A97E;
 $secondary-color:     #3498db;
 $border-color:        lightgrey;
 $fontface:            Arial, sans-serif;
+$font-color:          #222222;
 $font-size-xl:        32px;
 $font-size-lg:        24px;
 $font-size:           19px;
@@ -11,6 +12,7 @@ $font-size-xs:        14px;
 $button-hover-color:  lightgrey;
 $background-color:    white;
 $padding:             5px;
+$line-height:         32px;
 $logo-width:          50px;
 $logo-height:         16px;
 $popup-height:        320px;
@@ -19,8 +21,19 @@ $popup-height:        320px;
 
 .cheftonic-booking-wrapper {
     margin: 10px;
+    height:370px;
 }
 
+.cheftonic-booking-container {
+  color:$font-color;
+  line-height:$line-height;
+  position: relative;
+  background-color:$background-color;
+  z-index:1;
+}
+.calendar-container {
+  z-index:3;
+}
 @media (min-width: 480px) {
   .cheftonic-booking-container {
       display: grid;
@@ -28,7 +41,7 @@ $popup-height:        320px;
       grid-template-areas: 'pax date time';
       grid-template-columns: 1fr 1fr 1fr;
       grid-template-rows: auto 1fr auto;
-      position: relative;
+      position: relative
   }
   .cheftonic-details-container {
       display: grid;
@@ -75,7 +88,6 @@ $popup-height:        320px;
     }
 }
 
-
 /* Popup */
 .popup {
   position: absolute;
@@ -87,6 +99,11 @@ $popup-height:        320px;
   background-color: $background-color;
   border: 1px solid $border-color;
   border-radius: 3px 3px 3px 3px;
+  z-index:3;
+  .calendar_header {
+  z-index: 5;
+  }
+  /*
   .calendar_header:before, .calendar_header:after {
       border-style: solid;
       border-width: 8px;
@@ -103,9 +120,10 @@ $popup-height:        320px;
       content: "";
       display: block;
       position: absolute;
-      margin-left: -10px;
-      z-index: 100;
+      margin-top: -8px;
+      left:calc(50% - 5px;)
   }
+  */
 }
 
 
