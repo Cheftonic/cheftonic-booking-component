@@ -17,8 +17,6 @@ $logo-width:          50px;
 $logo-height:         16px;
 $popup-height:        320px;
 
-
-
 .cheftonic-booking-wrapper {
     margin: 10px;
     height:370px;
@@ -30,6 +28,7 @@ $popup-height:        320px;
   position: relative;
   background-color:$background-color;
   z-index:1;
+  font-family: $fontface;
 }
 .calendar-container {
   z-index:3;
@@ -271,6 +270,7 @@ $popup-height:        320px;
       height:40px;
       font-size: $font-size-sm;
       font-weight: 300;
+      width:calc(100px/7)
     }
     td {
       text-align: center;
