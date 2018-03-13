@@ -364,6 +364,9 @@ export class MakeBookingComponent {
     this.showCalendar = !this.showCalendar;
     if (this.showCalendar) {
       this.showTime = this.showPax = false;
+      this.el.shadowRoot.getElementById('cheftonic-booking-wrapper').style.height='370px';
+    } else {
+      this.el.shadowRoot.getElementById('cheftonic-booking-wrapper').style.height='';
     }
   }
 
@@ -373,6 +376,9 @@ export class MakeBookingComponent {
     }
     if (this.showTime) {
       this.showCalendar = this.showPax = false;
+      this.el.shadowRoot.getElementById('cheftonic-booking-wrapper').style.height='370px';
+    } else {
+      this.el.shadowRoot.getElementById('cheftonic-booking-wrapper').style.height='';
     }
   }
 
@@ -380,6 +386,9 @@ export class MakeBookingComponent {
     this.showPax = !this.showPax;
     if (this.showPax) {
       this.showCalendar = this.showTime = false;
+      this.el.shadowRoot.getElementById('cheftonic-booking-wrapper').style.height='370px';
+    } else {
+      this.el.shadowRoot.getElementById('cheftonic-booking-wrapper').style.height='';
     }
   }
 
@@ -491,7 +500,7 @@ export class MakeBookingComponent {
       )
     }
     return (
-      <div class="cheftonic-booking-wrapper">
+      <div id="cheftonic-booking-wrapper" class="cheftonic-booking-wrapper">
         <div class="cheftonic-booking-container">
           <div class="submit-booking-col" onClick = {this.togglePaxShow.bind(this)}>
             <span>{ this.bookingInfo.pax.toString().concat ((this.bookingInfo.pax > 1)?' personas':' persona')  }</span>
