@@ -1,4 +1,4 @@
-import { Component, Prop, State } from '@stencil/core';
+import { Component, Prop, State, Element } from '@stencil/core';
 import { ApolloClientProvider, MasterDataProvider } from '../../providers/providers';
 import gql from 'graphql-tag';
 
@@ -63,6 +63,8 @@ export class MakeBookingComponent {
 
   // The input object is the restaurant_id where the user wants to make the booking
   restid: string;
+
+  @Element() el: HTMLElement;
 
   // Internal object to represent the data of the booking
   bookingInfo: BookingInfo;
@@ -383,7 +385,7 @@ export class MakeBookingComponent {
 
   async submitBooking() {
     // Select form and force HTML5 validation
-    const f = (document.getElementsByTagName('cheftonic-booking-component')[0].shadowRoot.childNodes[1] as Document).getElementsByTagName('form')[0]
+    const f = this.el.shadowRoot.getElementById('booking-form') as HTMLFormElement
 
     if(! f.reportValidity()) {
       return false;
@@ -541,7 +543,7 @@ export class MakeBookingComponent {
           </div>
         }
 
-        <form class="cheftonic-details-container">
+        <form id ="booking-form" class="cheftonic-details-container">
           <div class="name">
             <span class="form-control">
               <label htmlFor="name">Nombre:</label>
