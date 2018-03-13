@@ -462,7 +462,7 @@ export class MakeBookingComponent {
     if (this.booking_state == BookingStates.invalid_id) {
       return (
         <div>
-          Parece haber un error de configuración en su componente. Para solucionarlo por favor envíe un correo a cdb@cheftonic.com incluyendo sus datos y esta información: apikey = {this.apikey}
+          Parece haber un error de configuración en su componente. Para solucionarlo por favor envíe un correo a <a href={'"mailto:support@cheftonic.com?&amp;subject=Booking%20component%20issue&amp;body=apikey%20:%20"'+this.apikey+'"'}>support@cheftonic.com</a> incluyendo sus datos y esta información: apikey = {this.apikey}
         </div>
       )
     }
@@ -572,7 +572,7 @@ export class MakeBookingComponent {
               <label htmlFor="special-requests">Solicitud particular:</label>
               <input type="text" id="special-requests" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui si tiene alguna solicitud particular."/>
           </div>
-          {(this.booking_state == BookingStates.submitted_ko) && <span class="error-message">Se ha producido un error al enviar su reserva, haga clicks abajo lo mas rapido posible para ver si se desatasca.</span>}
+          {(this.booking_state == BookingStates.submitted_ko) && <span class="error-message">Se ha producido un error al enviar su reserva, por favor inténtelo mas tarde.</span>}
 
           {(this.booking_state == BookingStates.invalid_day) ?
            <span class="error-message">El restaurante está cerrado hoy, por favor seleccione otra fecha.</span>
