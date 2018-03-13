@@ -470,8 +470,11 @@ export class MakeBookingComponent {
   render () {
     if (this.booking_state == BookingStates.invalid_id) {
       return (
-        <div>
+        <div id="cheftonic-booking-wrapper" class="cheftonic-booking-wrapper">
           Parece haber un error de configuración en su componente. Para solucionarlo por favor envíe un correo a <a href={'"mailto:support@cheftonic.com?&amp;subject=Booking%20component%20issue&amp;body=apikey%20:%20"'+this.apikey+'"'}>support@cheftonic.com</a> incluyendo sus datos y esta información: apikey = {this.apikey}
+          <div class="logo">
+            { getCheftonicLogo() }
+          </div>
         </div>
       )
     }
