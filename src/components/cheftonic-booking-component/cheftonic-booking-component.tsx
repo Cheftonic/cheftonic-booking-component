@@ -398,7 +398,7 @@ export class MakeBookingComponent {
 
     if(! f.reportValidity()) {
       return false;
-    } 
+    }
 
     // Check if the phone has been filled correctly
     this.booking_state = BookingStates.submitting;
@@ -485,12 +485,14 @@ export class MakeBookingComponent {
             <svg viewBox="0 0 30 30"  xmlns="http://www.w3.org/2000/svg"><g fill="#FFFFFF" fill-rule="evenodd"><path d="m7.8579 16.4645c-.391-.391-.391-1.024 0-1.414.391-.391 1.024-.391 1.414 0l3.536 3.535 8.485-8.485c.391-.39 1.024-.39 1.414 0 .391.391.391 1.024 0 1.414l-9.192 9.193c-.391.39-1.024.39-1.414 0z"/><path d="m15 29c-7.732 0-14-6.268-14-14s6.268-14 14-14 14 6.268 14 14-6.268 14-14 14m0-29c-8.284 0-15 6.716-15 15s6.716 15 15 15 15-6.716 15-15-6.716-15-15-15"/></g></svg>
               <p>Se ha enviado su solicitud de reserva para <span class="people">{ this.bookingResult.createExtBookRequest.num_pax }</span> en <span class="restaurant">{ this.bookingResult.createExtBookRequest.restaurant.r_name }</span><span class="reservation"> el <span class="date">{ new Date(this.bookingResult.createExtBookRequest.book_date).toLocaleDateString('es', { year:"numeric", month:"long", day:"numeric" }) }</span> a las <span class="time">{ new Date(this.bookingResult.createExtBookRequest.book_date).toLocaleTimeString('es', { hour:"2-digit", minute:"2-digit", hour12: false }) }</span></span></p>
           </div>
+          <div class="notice">
             <p>Recibirá un email con el acuse de recibo y ahora el restaurante deberá aceptar su reserva, tras lo cual recibirá otro email de confirmación.</p>
             <p>Muchas gracias por confiar en nosotros.</p>
-            <input type="button" class="button-reset" value="Realizar otra reserva" onClick={()=>this.booking_state = BookingStates.not_submitted}/>
-            <div class="logo">
-              { getCheftonicLogo() }
-            </div>
+          </div>
+          <input type="button" class="button-reset" value="Realizar otra reserva" onClick={()=>this.booking_state = BookingStates.not_submitted}/>
+          <div class="logo">
+            { getCheftonicLogo() }
+          </div>
         </div>
       )
     }
@@ -582,7 +584,7 @@ export class MakeBookingComponent {
           </div>
           <div class="special-requests">
               <label htmlFor="special-requests">Solicitud particular:</label>
-              <input type="text" id="special-requests" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui si tiene alguna solicitud particular."/>
+              <textarea id="special-requests" value={this.bookingInfo.notes} onInput={(e) => this.handleNotesChange(e)} placeholder="Especifique aqui si tiene alguna solicitud particular."/>
           </div>
           {(this.booking_state == BookingStates.submitted_ko) && <span class="error-message">Se ha producido un error al enviar su reserva, por favor inténtelo mas tarde.</span>}
 

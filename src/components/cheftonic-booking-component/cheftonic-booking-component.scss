@@ -1,35 +1,44 @@
 // Variables
-$primary-color:       #00A97E;
-$secondary-color:     #3498db;
-$border-color:        lightgrey;
-$fontface:            Arial, sans-serif;
-$font-color:          #222222;
-$font-size-xl:        32px;
-$font-size-lg:        24px;
-$font-size:           19px;
-$font-size-sm:        16px;
-$font-size-xs:        14px;
-$button-hover-color:  lightgrey;
-$background-color:    white;
-$padding:             5px;
-$line-height:         32px;
-$logo-width:          50px;
-$logo-height:         16px;
-$popup-height:        320px;
+$primary-color:         #00A97E;
+$secondary-color:       #3498db;
+$light:                 #ffffff;
+$dark:                  #222222;
+$light-grey:            #cccccc;
+$light-grey:            #cccccc;
+$dark-grey:             #aaaaaa;
+$border-color:          $light-grey;
+$fontface:              Arial, sans-serif;
+$component-max-width:   480px;
+$popup-height:          320px;
+$font-color-light:      $dark;
+$font-color-dark:       $light;
+$font-size-xl:          32px;
+$font-size-lg:          24px;
+$font-size:             19px;
+$font-size-sm:          16px;
+$font-size-xs:          14px;
+$button-hover-color:    $light-grey;
+$background-color-light:$light;
+$background-color-dark: $dark;
+$padding:               5px;
+$line-height-lg:        32px;
+$line-height:           22px;
+$logo-width:            50px;
+$logo-height:           16px;
 
 .cheftonic-booking-wrapper {
     margin: 10px;
-    background-color: white;
-    color: black;
+    background-color: $background-color-light;
+    max-width:480px;
+    font-family: $fontface;
+    color:$font-color-light;
 }
 
 .cheftonic-booking-container {
-  color:$font-color;
-  line-height:$line-height;
+  line-height:$line-height-lg;
   position: relative;
-  background-color:$background-color;
+  background-color:$background-color-light;
   z-index:1;
-  font-family: $fontface;
 }
 .calendar-container {
   z-index:3;
@@ -96,7 +105,7 @@ $popup-height:        320px;
   margin:0;
   padding:0;
   display: block;
-  background-color: $background-color;
+  background-color: $background-color-light;
   border: 1px solid $border-color;
   border-radius: 3px 3px 3px 3px;
   z-index:3;
@@ -132,7 +141,7 @@ $popup-height:        320px;
   > div {
     margin: 0;
     line-height: 1.43;
-    font-size: $font-size;
+    font-size: $font-size-sm;
     padding: 10px $padding;
     cursor: pointer;
     &:hover {
@@ -298,7 +307,7 @@ $popup-height:        320px;
     }
   }
   .day-disabled {
-    color:lightgrey;
+    color:$light-grey;
     font-size: $font-size;
   }
 }
@@ -337,6 +346,9 @@ $popup-height:        320px;
 /* Customer details */
 .cheftonic-details-container {
   font-size: $font-size-sm;
+  .name, .surname, .phone-number, .email-address, .special-requests {
+    background-color: white;
+  }
   .form-control {
     display: flex;
     justify-content: space-between;
@@ -347,25 +359,33 @@ $popup-height:        320px;
   label {
     padding-right:3px;
     min-width: 80px;
+    line-height:$line-height-lg;
+    color:grey;
+    width: 100%;
   }
   input {
     flex-grow:2;
     align-self:center;
   }
+  input::placeholder {
+    color:$light-grey;
+  }
   .special-requests {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    align-items: center;
     padding-left: $padding;
     label {
       padding-right:3px;
+      display: block;
+      width: 100%;
     }
-    input {
-      flex-grow:2;
+    textarea {
       align-self:center;
-      /* Text alignment fix */
-      border-bottom: 1px solid $background-color;
+      height:$line-height*3;
+      width: calc(100% - 10px);
+      font-size: $font-size-sm;
+      border:0;
+      &::placeholder {
+        color:$light-grey;
+      }
     }
   }
   .text {
@@ -400,7 +420,7 @@ $popup-height:        320px;
   border:0;
   width:100%;
   background: $primary-color;
-  color:$background-color;
+  color:$background-color-light;
   font-size:$font-size;
   text-align: center;
   padding:0 15px;
@@ -453,12 +473,16 @@ $popup-height:        320px;
 
 
   .confirm {
+    max-width:$component-max-width;
     .header {
       text-align: center;
       background-color:$primary-color;
-      padding-top:15px;
-      padding-bottom:15px;
-      color:white;
+      padding:15px;
+      p {
+        font-family: $fontface;
+        line-height: $line-height-lg;
+        color: $font-color-dark;
+      }
       .people {
         font-size: $font-size-lg;
         margin:10px 0;
@@ -468,14 +492,17 @@ $popup-height:        320px;
         display:block;
         margin:10px 0;
         font-size: $font-size-xl;
+        line-height: $line-height-lg;
       }
       .reservation {
         font-weight: 300;
         .date {
           font-size: $font-size-lg;
+          line-height: $line-height-lg;
         }
         .time {
           font-size: $font-size-lg;
+          line-height: $line-height-lg;
         }
       }
       svg {
@@ -483,10 +510,14 @@ $popup-height:        320px;
         height:60px;
       }
     }
-    p {
-      padding-left:10px;
-      padding-right:10px;
-      margin-top: 10px;
+    .notice {
+      background-color: $background-color-light;
+      padding:10px;
+      p {
+        font-family: $fontface;
+        line-height: $line-height;
+        color: $font-color-light;
+      }
     }
     .animate-bottom {
       position: relative;
