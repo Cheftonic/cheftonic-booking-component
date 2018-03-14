@@ -9,6 +9,7 @@ $dark-grey:             #aaaaaa;
 $border-color:          $light-grey;
 $fontface:              Arial, sans-serif;
 $component-max-width:   480px;
+$component-min-height:      370px;
 $popup-height:          320px;
 $font-color-light:      $dark;
 $font-color-dark:       $light;
@@ -30,6 +31,7 @@ $logo-height:           16px;
     margin: 10px;
     background-color: $background-color-light;
     max-width:480px;
+    min-height: $component-min-height;
     font-family: $fontface;
     color:$font-color-light;
 }
