@@ -28,8 +28,8 @@ export class ApolloClientProvider {
     }).restore({});
 
     const httpLink = new HttpLink ({
-      uri: 'http://localhost:3000/chftqry'
-       // uri: 'https://api.cheftonic.com/prod/chftqry'
+      // uri: 'http://localhost:3000/chftqry'
+        uri: 'https://api.cheftonic.com/prod/chftqry'
     });
 
 
