@@ -1,0 +1,77 @@
+
+.cheftonic-booking-wrapper {
+    margin: 10px;
+    max-width:480px;
+    min-height: $component-min-height;
+    font-family: $fontface;
+    color:$font-color-light;
+}
+
+.cheftonic-booking-container {
+  line-height:$line-height-lg;
+  position: relative;
+  background-color:$background-color-light;
+  z-index:1;
+}
+
+
+@media (min-width: 480px) {
+  .cheftonic-booking-container {
+      display: grid;
+      grid-gap: 0;
+      grid-template-areas: 'pax date time';
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto 1fr auto;
+      position: relative
+  }
+  .cheftonic-details-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto;
+  }
+  .cheftonic-booking-container div {
+    border: 1px solid $border-color;
+    border-right-width: 0;
+    border-bottom:0;
+    &:last-child {
+      border-right-width: 1px;
+    }
+  }
+  .cheftonic-details-container div {
+    border: 1px solid $border-color;
+    border-bottom:0;
+    &:nth-child(odd) {
+      border-right-width: 0;
+    }
+    &.special-requests {
+      border-right-width: 1px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .cheftonic-booking-container div,  .cheftonic-details-container div {
+    border: 1px solid $border-color;
+    border-bottom:0;
+  }
+  }
+  .cheftonic-details-container div:last-child {
+    border-bottom:1px solid $border-color;
+  }
+  .special-requests, .button-submit, .logo, .error-message {
+      grid-column: span 2;
+  }
+  .logo {
+      border:0 !important;
+      svg {
+        width:$logo-width;
+        height:$logo-height;
+  }
+}
+
+
+.logo {
+  padding-top:$padding;
+  width: 100%;
+  text-align: left;
+}

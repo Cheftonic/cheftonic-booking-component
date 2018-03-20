@@ -1,0 +1,97 @@
+/* CALENDAR STYLING */
+.calendar-container {
+  position: relative;
+  z-index:3;
+}
+
+.calendar_box {
+  width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  top: -10px;
+  .calendar_header {
+    display: flex;
+    border-bottom: 1px solid $border-color;
+    margin: 5px 10px 0;
+    div {
+      flex-grow: 1;
+      flex-shrink: 1;
+      flex-basis: 0;
+    }
+    .calendar_nav--prev {
+      text-align: left;
+    }
+    .calendar_month {
+      font-size: $font-size-xs;
+      font-weight: 300;
+      text-align: right;
+      padding-right: 2px;
+      line-height: 45px;
+    }
+    .calendar_year {
+      font-size: $font-size-xs;
+      font-weight: 300;
+      text-align: left;
+      padding-left: 2px;
+      line-height: 45px;
+    }
+    .calendar_nav--next {
+      text-align: right;
+    }
+    button {
+      width:40px;
+      height: 40px;
+      border:0;
+      border-radius: 20px 20px 20px 20px;
+      line-height:40px;
+      font-size: $font-size;
+      cursor: pointer;
+      &:hover{
+        background-color: $button-hover-color;
+      }
+      svg {
+        margin-bottom: 2px;
+      }
+    }
+  }
+  .calendar_table {
+    width:100%;
+    th {
+      text-align: center;
+      vertical-align: middle;
+      height:40px;
+      font-size: $font-size-sm;
+      font-weight: 300;
+      width:calc(100px/7)
+    }
+    td {
+      text-align: center;
+      vertical-align: middle;
+      height:40px;
+      font-weight: normal;
+    }
+    .active {
+      font-size: $font-size;
+      cursor: pointer;
+      border-radius: 20px 20px 20px 20px;
+      line-height:40px;
+      &:hover{
+        background-color: $button-hover-color;
+      }
+    }
+    .activeselectedButton {
+      font-size: $font-size;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 20px 20px 20px 20px;
+      line-height:40px;
+      background-color: orange;
+    }
+  }
+  .day-disabled {
+    color:$light-grey;
+    font-size: $font-size;
+  }
+}

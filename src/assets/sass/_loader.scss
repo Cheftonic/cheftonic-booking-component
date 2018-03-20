@@ -1,0 +1,104 @@
+.loader {
+  .animation {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    width: 150px;
+    height: 150px;
+    margin: -75px 0 0 -75px;
+    border: 16px solid transparent;
+    border-radius: 50%;
+    border-top: 16px solid $secondary-color;
+    width: 120px;
+    height: 120px;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+  }
+  .notice {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    text-align: center;
+    width:100px;
+  }
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+}
+
+
+  .confirm {
+    max-width:$component-max-width;
+    .header {
+      text-align: center;
+      background-color:$primary-color;
+      padding:15px;
+      p {
+        font-family: $fontface;
+        line-height: $line-height-lg;
+        color: $font-color-dark;
+      }
+      .people {
+        font-size: $font-size-lg;
+        margin:10px 0;
+      }
+      .restaurant {
+        font-weight: 700;
+        display:block;
+        margin:10px 0;
+        font-size: $font-size-xl;
+        line-height: $line-height-lg;
+      }
+      .reservation {
+        font-weight: 300;
+        .date {
+          font-size: $font-size-lg;
+          line-height: $line-height-lg;
+        }
+        .time {
+          font-size: $font-size-lg;
+          line-height: $line-height-lg;
+        }
+      }
+      svg {
+        width:60px;
+        height:60px;
+      }
+    }
+    .notice {
+      background-color: $background-color-light;
+      padding:10px;
+      p {
+        font-family: $fontface;
+        line-height: $line-height;
+        color: $font-color-light;
+      }
+    }
+    .animate-bottom {
+      position: relative;
+      -webkit-animation-name: animatebottom;
+      -webkit-animation-duration: 1s;
+      animation-name: animatebottom;
+      animation-duration: 1s
+    }
+
+    @-webkit-keyframes animatebottom {
+      from { bottom:-100px; opacity:0 }
+      to { bottom:0px; opacity:1 }
+    }
+
+    @keyframes animatebottom {
+      from{ bottom:-100px; opacity:0 }
+      to{ bottom:0; opacity:1 }
+    }
+  }

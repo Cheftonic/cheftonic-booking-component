@@ -1,0 +1,57 @@
+/* Customer details */
+.cheftonic-details-container {
+  font-size: $font-size-sm;
+  .name, .surname, .phone-number, .email-address, .special-requests {
+    background-color: white;
+  }
+  .form-control {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-left: $padding;
+  }
+  label {
+    padding-right:3px;
+    min-width: 80px;
+    line-height:$line-height-lg;
+    color:grey;
+    width: 100%;
+  }
+  input {
+    flex-grow:2;
+    align-self:center;
+  }
+  input::placeholder {
+    color:$light-grey;
+  }
+  .special-requests {
+    padding-left: $padding;
+    label {
+      padding-right:3px;
+      display: block;
+      width: 100%;
+    }
+    textarea {
+      align-self:center;
+      height:$line-height*3;
+      width: calc(100% - 10px);
+      font-size: $font-size-sm;
+      border:0;
+      &::placeholder {
+        color:$light-grey;
+      }
+    }
+  }
+  .text {
+    width:100%;
+    border-bottom: 0;
+  }
+  input {
+    font-size: $font-size-sm;
+    border:0;
+    line-height:28px;
+    /* Text alignment fix */
+    margin-bottom: 1px;
+  }
+}

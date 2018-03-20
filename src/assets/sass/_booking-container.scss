@@ -1,0 +1,36 @@
+.cheftonic-booking-container {
+  > div {
+    margin: 0;
+    line-height: 1.43;
+    font-size: $font-size-sm;
+    padding: 10px $padding;
+    cursor: pointer;
+    &:hover {
+      background: $button-hover-color;
+    }
+    label {
+      cursor: pointer;
+    }
+  }
+  .invalid-text {
+    border: 2px solid red;
+  }
+  .man-text {
+    font-size: $font-size;
+  }
+  .submit-booking-col {
+    display:flex;
+    text-align: left;
+    span.icon {
+      display:block;
+      flex-grow: 1;
+      text-align: right;
+      padding-left:$padding;
+      padding-right:$padding;
+      svg {
+        margin-bottom:2
+        px;
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+.error-noapi {
+  padding:10px;
+  padding-top:5px;
+  background-color: $background-color-light;
+  code {
+    font-size:$font-size;
+  }
+}
+.error-message {
+  color:red;
+  display:block;
+  padding:$padding;
+  border-left:1px solid $border-color;
+  border-right:1px solid $border-color;
+  border-top:1px solid $border-color;
+}
+
+.error-text {
+  font-size: $font-size;
+  margin: 0;
+  color: red;
+  svg {
+    margin: auto;
+    display: block;
+  }
+}
