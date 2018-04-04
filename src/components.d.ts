@@ -3,6 +3,9 @@
  * It contains typing information for all components that exist in this project
  * and imports for stencil collections that might be configured in your stencil.config.js file
  */
+
+import '@stencil/core';
+
 declare global {
   namespace JSX {
     interface Element {}
@@ -13,37 +16,36 @@ declare global {
   interface HTMLStencilElement extends HTMLElement {
     componentOnReady(): Promise<this>;
     componentOnReady(done: (ele?: this) => void): void;
+
+    forceUpdate(): void;
   }
 
   interface HTMLAttributes {}
 }
 
 
-import {
-  MakeBookingComponent as CheftonicBookingComponent
-} from './components/cheftonic-booking-component/cheftonic-booking-component';
-
 declare global {
-  interface HTMLCheftonicBookingComponentElement extends CheftonicBookingComponent, HTMLStencilElement {
+  interface HTMLCheftonicBookingComponentElement extends HTMLStencilElement {
+    'apikey': string;
   }
   var HTMLCheftonicBookingComponentElement: {
     prototype: HTMLCheftonicBookingComponentElement;
     new (): HTMLCheftonicBookingComponentElement;
   };
   interface HTMLElementTagNameMap {
-    "cheftonic-booking-component": HTMLCheftonicBookingComponentElement;
+    'cheftonic-booking-component': HTMLCheftonicBookingComponentElement;
   }
   interface ElementTagNameMap {
-    "cheftonic-booking-component": HTMLCheftonicBookingComponentElement;
+    'cheftonic-booking-component': HTMLCheftonicBookingComponentElement;
   }
   namespace JSX {
     interface IntrinsicElements {
-      "cheftonic-booking-component": JSXElements.CheftonicBookingComponentAttributes;
+      'cheftonic-booking-component': JSXElements.CheftonicBookingComponentAttributes;
     }
   }
   namespace JSXElements {
     export interface CheftonicBookingComponentAttributes extends HTMLAttributes {
-      apikey?: string;
+      'apikey'?: string;
     }
   }
 }
