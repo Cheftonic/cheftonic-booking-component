@@ -1,6 +1,8 @@
 import { Component, Prop, State, Element } from '@stencil/core';
 import { ApolloClientProvider, MasterDataProvider } from '../../providers/providers';
 import gql from 'graphql-tag';
+import moment from 'moment-timezone'
+
 
 import { ExtBookRequestInput, RestaurantBookingInfoQuery, BookRequestMutation } from '../../__generated__';
 import { Calendar, CalendarConfig } from './calendar';
@@ -138,9 +140,14 @@ export class MakeBookingComponent {
         this.toggleCalendarShow();
         console.log ('MAKE-BOOKING SELECT DAY - ' + this.bookingInfo.day);
       }
-      , async (param) => {
+      , async (param:Date) => {
         console.log ('MAKE-BOOKING MONTH CHANGE - ' + param.toISOString());
-        this.setCalendarConfigFromDate(param);
+        // Check if it's the current month, in which case we have to use the current date
+        if (this.in1Hour30Minutes().getMonth() === param.getMonth()) {
+          this.setCalendarConfigFromDate(this.in1Hour30Minutes());
+        } else {
+          this.setCalendarConfigFromDate(param);
+        }
         await this._daySelector.setConfig (this.calendarConfig);
 
         // Don't display the hourMinute component until some day is selected
@@ -202,15 +209,11 @@ export class MakeBookingComponent {
   }
 
   private in1Hour30Minutes(): Date {
-    const in1HourAnd30Minutes = new Date();
-    in1HourAnd30Minutes.setHours (in1HourAnd30Minutes.getHours() + 1);
-    in1HourAnd30Minutes.setMinutes (in1HourAnd30Minutes.getMinutes() + 30);
-    return in1HourAnd30Minutes;
+    console.log ('in1Hour30Minutes: ' + moment().add(90, 'minutes').tz('Europe/Madrid').format());
+    return moment().add(90, 'minutes').toDate();
   }
 
   private setCalendarConfigFromDate (initialDay: Date) {
-    // Check if it's the current month, in which case it will start in 1hour 30 mins
-    initialDay = (initialDay.getMonth() === new Date().getMonth()) ? this.in1Hour30Minutes() : initialDay;
 
       this.calendarConfig = {
         weekdaysEnabled: this.opening.open_weekdays,
@@ -233,14 +236,14 @@ export class MakeBookingComponent {
       minuteHeaderTranslateKey: 'BOOKING_COMPONENT.MINUTE_TITLE'
     };
     if (dayHours.hours.length > 0) {
-      const hoursArray = dayHours.hours.sort((a, b) => a - b).map (h => '0'.concat(h.toString()).slice(-2));
+      const hoursArray = dayHours.hours.sort((a, b) => a - b).map (h => String('0'.concat(h.toString())).slice(-2));
       newHourMinuteConfig.initialValue = hoursArray[0].concat (':00');
       newHourMinuteConfig.hoursToShow = hoursArray;
       this.booking_state = BookingStates.not_submitted;
     } else {
       // This means that there are no available hours
       newHourMinuteConfig.hoursToShow = [];
-      newHourMinuteConfig.initialValue = '12:00'
+      newHourMinuteConfig.initialValue = '--:--'
       this.booking_state = BookingStates.invalid_day;
     }
 
@@ -265,7 +268,7 @@ export class MakeBookingComponent {
     // 1.1. Check if the day is already cached, and if so return the computed hours. First check if it's null
     if (this.openHoursPerDay.has(cheftoDate)) {
       // console.log ("getOpeningHoursForDay Returning: " + JSON.stringify (this.openHoursPerDay.get (cheftoDate), null, 2))
-      return this.openHoursPerDay.get (cheftoDate);
+      return this.openHoursPerDay.get (cheftoDate); 
     }
 
     // 2. Check if it's in the closing_days array, if so, return an empty array
@@ -593,7 +596,7 @@ export class MakeBookingComponent {
           {(this.booking_state == BookingStates.submitted_ko) && <span class="error-message">Se ha producido un error al enviar su reserva, por favor inténtelo mas tarde.</span>}
 
           {(this.booking_state == BookingStates.invalid_day) ?
-           <span class="error-message">El restaurante está cerrado hoy, por favor seleccione otra fecha.</span>
+           <span class="error-message">No hay horas disponibles para este día, por favor seleccione otra fecha.</span>
           : <input type="button" class="button-submit" value="Reservar" onClick={this.submitBooking.bind(this)}/>}
 
           <div class="logo">
