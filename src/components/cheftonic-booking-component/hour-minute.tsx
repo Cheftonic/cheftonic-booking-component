@@ -96,7 +96,7 @@ export class HourMinute {
       numHours = Number(this.hourMinuteConfig.to.split(':')[0]) - Number(this.hourMinuteConfig.from.split(':')[0]);
     }
     this.hours = Array(numHours).fill('').map(({index}) => {
-      return ('0' + index).slice(-2);
+      return String('0' + index).slice(-2);
     });
   }
 
