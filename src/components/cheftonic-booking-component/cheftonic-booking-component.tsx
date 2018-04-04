@@ -155,7 +155,7 @@ export class MakeBookingComponent {
       });
 
     this._timeSelector = new HourMinute((param) => {
-      this.bookingInfo.time = param;
+      this.bookingInfo.time = (param == '--:--') ? '12:00' : param;
       const [hour, minutes] = param.split(':');
       this.bookingInfo.day.setHours (+hour, +minutes, 0, 0);
       this.toggleTimeShow();
@@ -316,7 +316,12 @@ export class MakeBookingComponent {
               // The service hasn't started yet or it is starting, return all hours in the service
               // const retVal = [...Array(numOfHours).keys()].map (x => x + startHour);
               // console.log ("Returning: " + JSON.stringify(retVal,null,2));
-              return [...Array(numOfHours).keys()].map (x => x + startHour);
+              let sha = new Array();
+              for (let i = 0; i < numOfHours; i++) {
+                sha.push (i+startHour);
+              }
+              return sha;
+              // return [...Array(numOfHours).keys()].map (x => x + startHour);
             } else if (todaysHour >= endHour) {
               // The service has finished or is about to finish, return empty array
               // console.log ("Returning empty: the service has finished");
@@ -326,13 +331,23 @@ export class MakeBookingComponent {
               const remainingHours = endHour - todaysHour;
               // const retVal = [...Array(remainingHours).keys()].map (x => x + todaysHour);
               // console.log ("Returning the remaining hours for this service: " + JSON.stringify(retVal,null,2));
-              return [...Array(remainingHours).keys()].map (x => x + todaysHour);
+              let sha = new Array();
+              for (let i = 0; i < remainingHours; i++) {
+                sha.push (i+todaysHour);
+              }
+              return sha;
+              // return [...Array(remainingHours).keys()].map (x => x + todaysHour);
             }
           } else {
             // It is not today, return all available hours for this service
             // const retVal = [...Array(numOfHours).keys()].map (x => x + startHour);
             // console.log ("Returning: " + JSON.stringify(retVal,null,2));
-            return [...Array(numOfHours).keys()].map (x => x + startHour);
+            let sha = new Array();
+            for (let i = 0; i < numOfHours; i++) {
+              sha.push (i+startHour);
+            }
+            return sha;
+            //return [...Array(numOfHours).keys()].map (x => x + startHour);
           }
         } else {
           // dayOfWeekFlag false
