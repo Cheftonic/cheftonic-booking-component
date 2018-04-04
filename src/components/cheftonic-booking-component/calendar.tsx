@@ -127,7 +127,8 @@ export class Calendar {
     for (let i = 1; i <= monthDays; i++) {
       let weekDay;
       newDate.setDate(i);
-      if (newDate.getDay() === 1) {
+      // Check if the DoW is 1, in which case we need to start a new line *except* if the first DoM is Monday
+      if ((newDate.getDay() === 1) && (newDate.getDate() > 1)) {
         // New Week line
         currentWeek++;
         this.parsedDates.week.push({day: new Array<CalendarDay>()});
@@ -179,8 +180,7 @@ export class Calendar {
   }
 
   private getFirstDayOfMonth (year: number, month: number): Date {
-    const dateString = year + '-' + (month + 1) + '-01';
-    const date = new Date(dateString);
+    const date = new Date(year, month + 1, 1);
     return date;
   }
   // #################################### SELECTED DATES FUNCTIONS ####################################
