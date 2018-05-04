@@ -1,12 +1,14 @@
 import { Component, Prop, State, Element } from '@stencil/core';
 import { ApolloClientProvider, MasterDataProvider } from '../../providers/providers';
 import gql from 'graphql-tag';
-import moment from 'moment-timezone'
+import Moment from 'moment-timezone';
+import momentRange from 'moment-range';
+import { DateRange } from 'moment-range';
 
+const moment = momentRange.extendMoment(Moment);
 
 import { ExtBookRequestInput, RestaurantBookingInfoQuery, BookRequestMutation } from '../../__generated__';
 import { Calendar, CalendarConfig } from './calendar';
-import { HourMinuteConfig, MinutesInterval, HourMinute } from './hour-minute';
 
 const RestaurantBookingInfo = gql`
 query RestaurantBookingInfo ($b_r_id: ID!) {
@@ -60,6 +62,7 @@ mutation BookRequest ($booking_info: ExtBookRequestInput!) {
   shadow: true
 })
 export class MakeBookingComponent {
+  
   // The input object is an API Key identifier, bounded to the particular business.
   @Prop() apikey: string;
 
@@ -88,8 +91,10 @@ export class MakeBookingComponent {
 
   // These objects are used to configure the calendar and the hour-minute components respectively
   @State() calendarConfig: CalendarConfig;
-  hourMinuteConfig: HourMinuteConfig;
+  // Set the default booking interval
+  bookingInterval = MinutesInterval.HALF; 
   showHourMinute: boolean;
+  soonestBookingDate: Date;
 
   // States of the component
   @State() booking_state: BookingStates;
@@ -104,7 +109,6 @@ export class MakeBookingComponent {
 
   // Selectors
   _daySelector: Calendar;
-  _timeSelector: HourMinute;
 
   constructor() {
     this._apolloProvider = new ApolloClientProvider();
@@ -113,10 +117,7 @@ export class MakeBookingComponent {
     // Initialize default booking setup
     this.bookingInfo = new BookingInfo();
     this.bookingInfo.pax = 2;
-    const now = new Date();
-    const in1Hour = new Date(now.setHours(now.getHours() + 1));
-    this.bookingInfo.day = in1Hour;
-    this.bookingInfo.time = in1Hour.getHours() + ':00';
+    this.bookingInfo.day = moment();
 
     this.showHourMinute = false;
 
@@ -130,37 +131,35 @@ export class MakeBookingComponent {
     return new RegExp(restIdRegexp).test(key);
   }
 
-  private initSelectors() {
+  private async initCalendarComponent() {
+    console.log ('Initializing calendar...')
     this._daySelector = new Calendar(this._masterDataProvider,
-      async (param) => {
-        const selectedDay = param.pop();
-        this.bookingInfo.day = selectedDay;
-        await this.setHourMinuteConfigForDate (selectedDay);
-        await this._timeSelector.setConfig (this.hourMinuteConfig);
+      async (param:Array<Date>) => {
+        this.bookingInfo.day = this._getOpeningHoursForDay(moment(param.pop())).services[0].range.start;
+        await this.setHourMinuteConfigForDate ();
         this.toggleCalendarShow();
         console.log ('MAKE-BOOKING SELECT DAY - ' + this.bookingInfo.day);
       }
       , async (param:Date) => {
         console.log ('MAKE-BOOKING MONTH CHANGE - ' + param.toISOString());
+        
         // Check if it's the current month, in which case we have to use the current date
-        if (this.in1Hour30Minutes().getMonth() === param.getMonth()) {
-          this.setCalendarConfigFromDate(this.in1Hour30Minutes());
+        if (moment().isSame (param, 'month')) {
+          this.bookingInfo.day = this.findFirstBookingTime();
         } else {
-          this.setCalendarConfigFromDate(param);
+          this.bookingInfo.day = this.findFirstBookingTime(moment(param))
         }
+
+        this.calendarConfig = this.getCalendarConfigFromDate();
         await this._daySelector.setConfig (this.calendarConfig);
 
         // Don't display the hourMinute component until some day is selected
         this.showHourMinute = false;
       });
-
-    this._timeSelector = new HourMinute((param) => {
-      this.bookingInfo.time = (param == '--:--') ? '12:00' : param;
-      const [hour, minutes] = param.split(':');
-      this.bookingInfo.day.setHours (+hour, +minutes, 0, 0);
-      this.toggleTimeShow();
-      console.log ('MAKE-BOOKING FULL TIME - ' + this.bookingInfo.day.toISOString());
-    });
+      console.log ('Calendar created!');
+      this.calendarConfig = this.getCalendarConfigFromDate ();
+      console.log ('Calendar config: ' + JSON.stringify (this.calendarConfig,null,2));
+      await this._daySelector.setConfig (this.calendarConfig);
   }
 
   async componentWillLoad() {
@@ -176,25 +175,17 @@ export class MakeBookingComponent {
       })
       const restData = restQuery.data;
       // console.log ("Restaurant info retrieved: " + JSON.stringify(data, null, 2));
-      if (restData.getRestaurantById.opening && restData.getRestaurantById.services && restData.getRestaurantById.services.length > 0) {
+      if (restData.getRestaurantById.opening && restData.getRestaurantById.services && this.validateRestData(restData)) {
         // Fetch the data
         this.opening = restData.getRestaurantById.opening;
         this.services = restData.getRestaurantById.services;
         this.openHoursPerDay = new Map<string, DayHours>();
 
-        this.initSelectors();
+        this.bookingInfo.day = this.findFirstBookingTime();
 
-        // The calendar should start 1h 30 mins ahead of current time
-        this.setCalendarConfigFromDate (this.in1Hour30Minutes());
-
-        await this._daySelector.setConfig (this.calendarConfig);
-
-        await this.setHourMinuteConfigForDate (this.in1Hour30Minutes());
-
-        await this._timeSelector.setConfig (this.hourMinuteConfig);
-
-        const [hour, minutes] = this.hourMinuteConfig.initialValue.split(':');
-        this.bookingInfo.day.setHours (+hour, +minutes, 0, 0);
+        await this.initCalendarComponent();
+        
+        await this.setHourMinuteConfigForDate ();
 
         // The restaurant is loaded and ready to receive bookings
         this.restaurant_status = RestaurantStates.ok;
@@ -208,48 +199,59 @@ export class MakeBookingComponent {
     }
   }
 
-  private in1Hour30Minutes(): Date {
-    console.log ('in1Hour30Minutes: ' + moment().add(90, 'minutes').tz('Europe/Madrid').format());
-    return moment().add(90, 'minutes').toDate();
-  }
-
-  private setCalendarConfigFromDate (initialDay: Date) {
-
-      this.calendarConfig = {
-        weekdaysEnabled: this.opening.open_weekdays,
-        disabledDays: [], // await this.getDisabledDaysInMonth(initialDay),
-        multiSelection: false,
-        todayTomorrow: false,
-        dateFrom: initialDay
-      };
-
-      // Don't display the hourMinute component until some day is selected
-      this.showHourMinute = false;
-  }
-
-  private async setHourMinuteConfigForDate (date: Date) {
-    const dayHours = this._getOpeningHoursForDay (date);
-
-    let newHourMinuteConfig:HourMinuteConfig = {
-      interval: MinutesInterval.HALF,
-      hourHeaderTranslateKey: 'BOOKING_COMPONENT.HOUR_TITLE',
-      minuteHeaderTranslateKey: 'BOOKING_COMPONENT.MINUTE_TITLE'
-    };
-    if (dayHours.hours.length > 0) {
-      const hoursArray = dayHours.hours.sort((a, b) => a - b).map (h => String('0'.concat(h.toString())).slice(-2));
-      newHourMinuteConfig.initialValue = hoursArray[0].concat (':00');
-      newHourMinuteConfig.hoursToShow = hoursArray;
-      this.booking_state = BookingStates.not_submitted;
-    } else {
-      // This means that there are no available hours
-      newHourMinuteConfig.hoursToShow = [];
-      newHourMinuteConfig.initialValue = '--:--'
-      this.booking_state = BookingStates.invalid_day;
+  private findFirstBookingTime (candidateDate?:Moment.Moment):Moment.Moment {
+    if (!candidateDate) {
+      candidateDate = moment();
     }
 
-    this.bookingInfo.time = newHourMinuteConfig.initialValue;
-    this.hourMinuteConfig = newHourMinuteConfig;
+    let availableHours:DayHours;
 
+    do {
+      availableHours = this._getOpeningHoursForDay(candidateDate)
+      if (availableHours.services.length === 0) {
+        // Evaluate next day
+        candidateDate.add(1,'day').startOf('day');
+      }
+    } while (availableHours.services.length === 0);
+    // Return the first date of the first service for that day
+    return availableHours.services[0].range.start;
+  }
+
+  private validateRestData(restData) {
+    // Check that at least there's one week day opened both in restaurant and services
+    return ((restData.getRestaurantById.opening.open_weekdays.length > 0)
+    // Check that there are services with valid hours, opened at least one weekday and with the flag online_allowed to true
+    && (restData.getRestaurantById.services.filter (service => (
+      // (service.starts_at > service.ends_at) && 
+      (service.open_weekdays.length > 0) && 
+      service.booking_config.online_allowed) ).length > 0)
+    )
+  }
+
+  private getCalendarConfigFromDate (): CalendarConfig {
+      return {
+        weekdaysEnabled: this.opening.open_weekdays,
+        disabledDays: this.getDisabledDaysInMonth(this.bookingInfo.day),
+        multiSelection: false,
+        todayTomorrow: false,
+        dateFrom: this.bookingInfo.day.toDate()
+      };
+  }
+
+  private getDisabledDaysInMonth (currDay: Moment.Moment):Date[] {
+    const closing_days:Array<Date> = (this.opening.closing_days as Array<string>).map (dateStr => moment(dateStr, 'YYYY/MM/DD').toDate());
+
+    if (closing_days.length == 0) {
+      return []
+    } else {
+      const today = moment();
+      // Return the days ahead of today and in the month being displayed.
+      return closing_days.filter ((day) => ((today.diff (day, 'days')>=0) && (currDay.diff (day, 'months') == 0)));
+    }
+  }
+
+  private async setHourMinuteConfigForDate () {
+    this.booking_state = BookingStates.not_submitted;
     this.showHourMinute = true;
   }
 
@@ -260,21 +262,22 @@ export class MakeBookingComponent {
    * @param day Day to be processed
    * @param dowMD Days of the week coming from the Master Data table
    */
-  private _getOpeningHoursForDay (day: Date): DayHours {
+  private _getOpeningHoursForDay (day: Moment.Moment): DayHours {
     // 1. Get the date in cheftonic format
-    const cheftoDate: string = getCheftonicDate(day);
+    const cheftoDate: string = getCheftonicDate(day.toDate());
     // console.log ('getOpeningHoursForDay for ' + cheftoDate)
 
     // 1.1. Check if the day is already cached, and if so return the computed hours. First check if it's null
     if (this.openHoursPerDay.has(cheftoDate)) {
       // console.log ("getOpeningHoursForDay Returning: " + JSON.stringify (this.openHoursPerDay.get (cheftoDate), null, 2))
-      return this.openHoursPerDay.get (cheftoDate); 
+      return this.openHoursPerDay.get (cheftoDate);
     }
 
     // 2. Check if it's in the closing_days array, if so, return an empty array
     if (this.opening.closing_days && this.opening.closing_days.includes (cheftoDate)) {
-      const dh:DayHours = {day: day, hours: []};
+      const dh:DayHours = {day: day, services: []};
       // console.log ("getOpeningHoursForDay Returning: " + JSON.stringify (dh, null, 2))
+      this.openHoursPerDay.set (cheftoDate, dh);
       return dh;
     }
 
@@ -285,69 +288,50 @@ export class MakeBookingComponent {
       c. If the selected day is the current day, check the start and end service time.
     */
 
-    // const dow = dowMD[day.getDay()];
-
     // Check if the restaurant is open that day of week
+    // Map the services array to effective date ranges where the online booking is allowed in this particular day
 
-    const serviceHoursAvailable = this.services.map (svc => {
+    const serviceHoursAvailable = this.services.map ((svc):Array<ServiceRange> => {
       // console.log ("processing service: " + JSON.stringify (svc, null, 2));
       // (a.) Services that are allowed to be booked online
-      // const bookOnlineFlag = (svc.booking_config.online_allowed) ? (svc.booking_config.online_allowed > 0) : true
+      
       if (svc.booking_config.online_allowed) {
         // (b.) Services active in that particular weekday. If open_weekdays is not present, it means that is available all days.
-        const dayOfWeekFlag = (svc.open_weekdays) ? (svc.open_weekdays.includes(day.toLocaleDateString('en', { weekday: 'long'}).toLowerCase())) : true;
-        if (dayOfWeekFlag) {
+        const openedDoW = (svc.open_weekdays) ? (svc.open_weekdays.includes(day.format ('dddd').toLowerCase())) : true;
+        if (openedDoW) {
           // First we do some common cases calculations to use them later
-          const d = new Date();
-          const startHour = parseInt (svc.starts_at.split(':')[0], 10);
-          const endHour = parseInt (svc.ends_at.split(':')[0], 10);
-          const numOfHours = endHour - startHour;
-
-          if (d.toDateString() === day.toDateString()) {
+          const d = moment();
+          const startTime = moment(day).hour(svc.starts_at.split(':')[0]).minute(svc.starts_at.split(':')[1]).startOf('minute');
+          const endTime = moment(day).hour(svc.ends_at.split(':')[0]).minute(svc.ends_at.split(':')[1]).startOf('minute');
+          
+          const svcRange = moment.range (startTime, endTime);
+          let serviceValidRange:ServiceRange = {id: svc.rs_id, range: svcRange};
+          
+          if (d.isSame(day, 'day')) {
             // console.log ("TODAY");
             // (c.) If the selected day is the current day, check the start and end service time.
-            // Find the current date plus 1 hour and 30 minutes (default minimum delay is 1 hour for booking)
-            const in1HourAnd30Minutes = new Date();
-            in1HourAnd30Minutes.setHours (in1HourAnd30Minutes.getHours() + 1);
-            in1HourAnd30Minutes.setMinutes (in1HourAnd30Minutes.getMinutes() + 30);
-            const todaysHour = in1HourAnd30Minutes.getHours();
+            // If the service has the in_advance parameter set, we add these minutes to current time, 
+            // as it's the soonest time this service can be booked in advance.
+            let soonestBookingTimeFromNow = (svc.booking_config.in_advance) ? moment().add (svc.booking_config.in_advance, 'minutes') : moment();
+            // Get the number of minutes to the next interval
+            const minsToNextInterval = this.bookingInterval - (soonestBookingTimeFromNow.minute() % this.bookingInterval);
+            soonestBookingTimeFromNow.add (minsToNextInterval, 'minutes').startOf('minute');
 
-            if (todaysHour <= startHour) {
+            if (soonestBookingTimeFromNow.isBefore(startTime)) {
               // The service hasn't started yet or it is starting, return all hours in the service
-              // const retVal = [...Array(numOfHours).keys()].map (x => x + startHour);
-              // console.log ("Returning: " + JSON.stringify(retVal,null,2));
-              let sha = new Array();
-              for (let i = 0; i < numOfHours; i++) {
-                sha.push (i+startHour);
-              }
-              return sha;
-              // return [...Array(numOfHours).keys()].map (x => x + startHour);
-            } else if (todaysHour >= endHour) {
-              // The service has finished or is about to finish, return empty array
+              return [serviceValidRange];
+            } else if (soonestBookingTimeFromNow.isAfter (endTime)) {
+              // The service has finished
               // console.log ("Returning empty: the service has finished");
               return [];
             } else {
               // The time is in between the service, get the hours remaining until it finishes
-              const remainingHours = endHour - todaysHour;
-              // const retVal = [...Array(remainingHours).keys()].map (x => x + todaysHour);
-              // console.log ("Returning the remaining hours for this service: " + JSON.stringify(retVal,null,2));
-              let sha = new Array();
-              for (let i = 0; i < remainingHours; i++) {
-                sha.push (i+todaysHour);
-              }
-              return sha;
-              // return [...Array(remainingHours).keys()].map (x => x + todaysHour);
+              serviceValidRange.range = moment.range (soonestBookingTimeFromNow, endTime)
+              return [serviceValidRange]
             }
           } else {
-            // It is not today, return all available hours for this service
-            // const retVal = [...Array(numOfHours).keys()].map (x => x + startHour);
-            // console.log ("Returning: " + JSON.stringify(retVal,null,2));
-            let sha = new Array();
-            for (let i = 0; i < numOfHours; i++) {
-              sha.push (i+startHour);
-            }
-            return sha;
-            //return [...Array(numOfHours).keys()].map (x => x + startHour);
+            // It is not today, return all available hours for this service.
+            return [serviceValidRange];
           }
         } else {
           // dayOfWeekFlag false
@@ -364,7 +348,8 @@ export class MakeBookingComponent {
       const res = prev.concat(curr);
       return res;
     });
-    const res:DayHours = {day: day, hours: serviceHoursAvailable};
+
+    const res:DayHours = {day: day, services: serviceHoursAvailable};
     // put it on the map to cache it
     this.openHoursPerDay.set (cheftoDate, res);
 
@@ -432,7 +417,7 @@ export class MakeBookingComponent {
       name: this.bookingInfo.name,
       surname: this.bookingInfo.surname,
       channel: 'external_web',
-      service: this.services.find ((service) => (this.bookingInfo.time >= service.starts_at && this.bookingInfo.time < service.ends_at)).rs_id
+      service: this._getOpeningHoursForDay(this.bookingInfo.day).services.find (service => this.bookingInfo.day.within(service.range)).id
     };
 
     console.log ('Submitting booking info: ' + JSON.stringify(bookRequestInput,null,2));
@@ -485,6 +470,25 @@ export class MakeBookingComponent {
     this.bookingInfo.notes = event.target.value;
   }
 
+  setTime (event) {
+    console.log ('Time Selected: ' + event.target.textContent);
+    this.bookingInfo.day.hour(event.target.textContent.split(':')[0]).minute(event.target.textContent.split(':')[1]).startOf('minute')
+    this.toggleTimeShow();
+    console.log ('MAKE-BOOKING FULL TIME - ' + this.bookingInfo.day.toISOString() + '. Localized: ' + moment(this.bookingInfo.day).toLocaleString());
+  }
+
+  _getHoursToDisplayForDay (day:Moment.Moment) {
+    const dayHours = this._getOpeningHoursForDay(day);
+    const hoursList = dayHours.services.map (serviceSlot => {
+      const serviceSlotList = Array.from(serviceSlot.range.by ('minutes', {excludeEnd: true, step: MinutesInterval.HALF}))
+      return serviceSlotList
+    }).reduce ((prev, curr) => {
+      const res = prev.concat(curr);
+      return res;
+    });
+    return hoursList
+  }
+
   render () {
     if (this.booking_state == BookingStates.invalid_id) {
       return (
@@ -526,6 +530,7 @@ export class MakeBookingComponent {
         </div>
       )
     }
+    // Main screen
     return (
       <div id="cheftonic-booking-wrapper" class="cheftonic-booking-wrapper">
         <div class="cheftonic-booking-container">
@@ -536,13 +541,13 @@ export class MakeBookingComponent {
             </span>
           </div>
           <div class="submit-booking-col" onClick = {this.toggleCalendarShow.bind(this)}>
-              <label class="booking-bar-date">{ this.bookingInfo.day.toLocaleDateString(navigator.language, { year: 'numeric', month: 'short', day: 'numeric' }) }</label>
+              <label class="booking-bar-date">{ this.bookingInfo.day.toDate().toLocaleDateString(navigator.language, { year: 'numeric', month: 'short', day: 'numeric' }) }</label>
               <span class="icon">
                 <svg height="7" viewBox="0 0 100 56" width="13" xmlns="http://www.w3.org/2000/svg"><path d="m45.6195417 76.1916897-43.80544294-43.6532449c-2.41879835-2.4103944-2.41879835-6.3195686 0-8.730649 2.41948667-2.4103944 6.34229025-2.4103944 8.76108864 0l39.4248986 39.2879204 39.4248987-39.2879204c2.4187984-2.4103944 6.3416019-2.4103944 8.7604003 0 2.419487 2.4110804 2.419487 6.3202546 0 8.730649l-43.8047547 43.6532449c-2.4194866 2.4110804-6.3416019 2.4110804-8.7610886 0" fill-rule="evenodd" transform="translate(0 -22)"/></svg>
               </span>
           </div>
           <div class="submit-booking-col" onClick = {this.toggleTimeShow.bind(this)}>
-            <label class="booking-bar-Time">{ this.bookingInfo.time }</label>
+            <label class="booking-bar-Time">{ this.bookingInfo.day.format ('HH:mm') }</label>
             <span class="icon">
               <svg height="7" viewBox="0 0 100 56" width="13" xmlns="http://www.w3.org/2000/svg"><path d="m45.6195417 76.1916897-43.80544294-43.6532449c-2.41879835-2.4103944-2.41879835-6.3195686 0-8.730649 2.41948667-2.4103944 6.34229025-2.4103944 8.76108864 0l39.4248986 39.2879204 39.4248987-39.2879204c2.4187984-2.4103944 6.3416019-2.4103944 8.7604003 0 2.419487 2.4110804 2.419487 6.3202546 0 8.730649l-43.8047547 43.6532449c-2.4194866 2.4110804-6.3416019 2.4110804-8.7610886 0" fill-rule="evenodd" transform="translate(0 -22)"/></svg>
             </span>
@@ -574,7 +579,14 @@ export class MakeBookingComponent {
         {(this.showTime) &&
           <div id="booking-time-container" class="time-container">
             <div class="time_box popup">
-              { this._timeSelector.renderHourMinute() }
+              <ul class="time-list">
+                { this._getHoursToDisplayForDay(this.bookingInfo.day).map (bookingTime =>
+                    <li value= {bookingTime.toISOString()} onClick={this.setTime.bind(this)} class="booking_time">
+                    { bookingTime.format ('HH:mm') }
+                  </li>
+                  )
+                }
+              </ul>
             </div>
           </div>
         }
@@ -624,8 +636,7 @@ export class MakeBookingComponent {
 }
 
 export class BookingInfo {
-  day: Date;
-  time: string;
+  day: Moment.Moment;
   pax: number;
   notes: string;
   phone: string;
@@ -635,9 +646,13 @@ export class BookingInfo {
   service: string;
 }
 
+interface ServiceRange {
+  id: string;
+  range: DateRange
+}
 interface DayHours {
-  day: Date;
-  hours: Array<number>;
+  day: Moment.Moment;
+  services: Array<ServiceRange>;
 }
 
 enum BookingStates {
@@ -653,6 +668,12 @@ enum RestaurantStates {
   ok = 'OK',
   info_pending = 'LOAD_PENDING',
   not_loaded = 'NOT_LOADED'
+}
+
+enum MinutesInterval {
+  QUARTERLY = 15,
+  HALF = 30,
+  FULL = 60
 }
 
 const getCheftonicDate = (date: Date) => (date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate());

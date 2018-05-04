@@ -25,9 +25,15 @@ declare global {
 
 
 declare global {
-  interface HTMLCheftonicBookingComponentElement extends HTMLStencilElement {
-    'apikey': string;
+
+  namespace StencilComponents {
+    interface CheftonicBookingComponent {
+      'apikey': string;
+    }
   }
+
+  interface HTMLCheftonicBookingComponentElement extends StencilComponents.CheftonicBookingComponent, HTMLStencilElement {}
+
   var HTMLCheftonicBookingComponentElement: {
     prototype: HTMLCheftonicBookingComponentElement;
     new (): HTMLCheftonicBookingComponentElement;
