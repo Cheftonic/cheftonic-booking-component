@@ -20,9 +20,7 @@ export interface RestaurantBookingInfoQueryVariables {
 };
 
 export interface RestaurantBookingInfoQuery {
-  // Restaurant
   getRestaurantById:  {
-    // Business and restaurant IDs concatenated: b_id + "." + r_id
     b_r_id: string,
     opening:  {
       from: string | null,
@@ -31,7 +29,6 @@ export interface RestaurantBookingInfoQuery {
       closing_days: Array< string | null > | null,
     } | null,
     services:  Array< {
-      // Restaurant Service Id
       rs_id: string,
       name: string,
       is_active: boolean,
@@ -57,7 +54,6 @@ export interface BookRequestMutationVariables {
 };
 
 export interface BookRequestMutation {
-  // External Operation - Create book request
   createExtBookRequest:  {
     book_date: string,
     num_pax: number,
@@ -73,7 +69,6 @@ export interface MasterDataQueryVariables {
 };
 
 export interface MasterDataQuery {
-  // MasterData
   getMasterDataKey:  {
     opt_id: string,
     lang: string,

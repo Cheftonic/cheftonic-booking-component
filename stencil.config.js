@@ -3,7 +3,7 @@ const sass = require('@stencil/sass');
 exports.config = {
   namespace: 'cheftonic-booking-component',
   outputTargets: [
-    { type: 'www' },
+    // { type: 'www' },
     { type: 'dist' }
   ],
   plugins: [
