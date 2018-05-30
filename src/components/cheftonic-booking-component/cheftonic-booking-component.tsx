@@ -239,14 +239,14 @@ export class MakeBookingComponent {
   }
 
   private getDisabledDaysInMonth (currDay: Moment.Moment):Date[] {
-    const closing_days:Array<Date> = (this.opening.closing_days as Array<string>).map (dateStr => moment(dateStr, 'YYYY/MM/DD').toDate());
+    const closing_days:Moment.Moment[] = (this.opening.closing_days) ? (this.opening.closing_days as string[]).map (dateStr => moment(dateStr, 'YYYY/MM/DD')) : [];
 
     if (closing_days.length == 0) {
       return []
     } else {
       const today = moment();
       // Return the days ahead of today and in the month being displayed.
-      return closing_days.filter ((day) => ((today.diff (day, 'days')>=0) && (currDay.diff (day, 'months') == 0)));
+      return closing_days.filter ((day) => ((day.diff (today, 'days')>=0) && (currDay.diff (day, 'months') == 0))).map ((day) => day.toDate());
     }
   }
 
