@@ -278,6 +278,7 @@ export class MakeBookingComponent {
     }
 
     let availableHours:DayHours;
+    let maxDate = moment().add(6,'M').endOf('month')
 
     do {
       console.log('candidateDate: ', candidateDate)
@@ -287,7 +288,7 @@ export class MakeBookingComponent {
         // Evaluate next day
         candidateDate.add(1,'day').startOf('day');
       }
-    } while (availableHours.services.length === 0 || candidateDate < moment().add(6,'M').endOf('month'));
+    } while (availableHours.services.length === 0 && candidateDate.isBefore(maxDate));
     // Return the first date of the first service for that day
     return availableHours.services[0].range.start;
   }
