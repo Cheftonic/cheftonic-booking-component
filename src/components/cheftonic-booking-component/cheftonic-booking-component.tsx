@@ -4,10 +4,11 @@ import gql from 'graphql-tag';
 import Moment from 'moment-timezone';
 import momentRange from 'moment-range';
 import { DateRange } from 'moment-range';
+declare var daterangepicker;
 
 const moment = momentRange.extendMoment(Moment);
 
-import { ExtBookRequestInput, RestaurantBookingInfoQuery, BookRequestMutation } from '../../__generated__';
+import { ExtBookRequestInput, RestaurantBookingInfoQuery, BookRequestMutation, RestaurantSpecialOpeningsToSixMonthsQuery } from '../../__generated__';
 import { Calendar, CalendarConfig } from './calendar';
 
 const RestaurantBookingInfo = gql`
@@ -29,21 +30,59 @@ query RestaurantBookingInfo ($b_r_id: ID!) {
       starts_at
       ends_at
       booking_config {
-        capacity
-        closing_time
-        in_advance
         online_allowed
+        booking_freq
+        booking_duration
+        in_advance_booking
+        prepayment
+        prepayment_min_pax
+        prepayment_pax_charge
+        no_show
         no_show_charge
-        min_pax
-        max_pax
+        no_show_min_pax
+        no_show_max_pax
+        in_advance_cancellation
+      }
+    }
+  }
+}`;
+
+const RestaurantSpecialOpeningsToSixMonths = gql`query RestaurantSpecialOpeningsToSixMonths($b_r_id:ID!, $month:Int, $year:Int ) {
+  getRestaurantById (b_r_id:$b_r_id) {
+    b_r_id
+    special_openings (month:$month, year:$year ) {
+      so_id
+      open_weekdays
+      from
+      to
+      services{
+        name
+        is_active
+        open_weekdays
+        starts_at
+        ends_at
+        booking_config {
+          online_allowed
+          booking_freq
+          booking_duration
+          in_advance_booking
+          prepayment
+          prepayment_min_pax
+          prepayment_pax_charge
+          no_show
+          no_show_charge
+          no_show_min_pax
+          no_show_max_pax
+          in_advance_cancellation
+        }
       }
     }
   }
 }`;
 
 const CreateBookRequest = gql`
-mutation BookRequest ($booking_info: ExtBookRequestInput!) {
-  createExtBookRequest (book_request: $booking_info) {
+mutation BookRequest ($book_request: ExtBookRequestInput!) {
+  createExtBookRequest (book_request: $book_request) {
     book_date
     num_pax
     restaurant {
@@ -70,6 +109,7 @@ export class MakeBookingComponent {
   restid: string;
 
   @Element() el: HTMLElement;
+  @Element() calendar_container: HTMLElement;
 
   // Internal object to represent the data of the booking
   bookingInfo: BookingInfo;
@@ -78,6 +118,10 @@ export class MakeBookingComponent {
   // There objects represents the restaurant info about openings and services available
   opening: any;
   services: Array<any>;
+  default_services: Array<any>;
+
+  // Info about special date openings. Each special opening includes date range, available services, open_weekdays
+  special_openings
 
   // Decides what should be shown
   @State() showCalendar: boolean = false;
@@ -110,6 +154,9 @@ export class MakeBookingComponent {
   // Selectors
   _daySelector: Calendar;
 
+  // Calendar (DateRangePicker)
+  drp
+
   constructor() {
     this._apolloProvider = new ApolloClientProvider();
     this._masterDataProvider = new MasterDataProvider(this._apolloProvider);
@@ -131,35 +178,45 @@ export class MakeBookingComponent {
     return new RegExp(restIdRegexp).test(key);
   }
 
-  private async initCalendarComponent() {
+  private initCalendarComponent() {
+    
     console.log ('Initializing calendar...')
-    this._daySelector = new Calendar(this._masterDataProvider,
-      async (param:Array<Date>) => {
-        this.bookingInfo.day = this._getOpeningHoursForDay(moment(param.pop())).services[0].range.start;
-        await this.setHourMinuteConfigForDate ();
-        this.toggleCalendarShow();
-        console.log ('MAKE-BOOKING SELECT DAY - ' + this.bookingInfo.day);
-      }
-      , async (param:Date) => {
-        console.log ('MAKE-BOOKING MONTH CHANGE - ' + param.toISOString());
-        
-        // Check if it's the current month, in which case we have to use the current date
-        if (moment().isSame (param, 'month')) {
-          this.bookingInfo.day = this.findFirstBookingTime();
-        } else {
-          this.bookingInfo.day = this.findFirstBookingTime(moment(param))
+
+    this.drp = new daterangepicker (
+      this.calendar_container.shadowRoot.getElementById('booking-cal-container'),    
+      {
+        timePicker: false,
+        singleDatePicker: true,
+        autoApply: true,
+        minDate: moment(),
+        maxDate: moment().add(6,'M').endOf('month'),
+        locale: {
+          daysOfWeek: Moment.weekdaysMin(),
+          monthNames: Moment.months(),
+          firstDay: 1
+        },
+        isInvalidDate: (date: Moment.Moment) => {
+          return this.isClosingDate(date) 
+        }
+      },
+      (selected_date: Moment.Moment) =>{
+        console.log('selected date: ', selected_date)
+        // Check if selected date is different from current date
+        if(selected_date != this.bookingInfo.day){
+          this.bookingInfo.day = this._getOpeningHoursForDay(selected_date).services[0].range.start;
+          this.setHourMinuteConfigForDate ();
+          this.toggleCalendarShow()
         }
 
-        this.calendarConfig = this.getCalendarConfigFromDate();
-        await this._daySelector.setConfig (this.calendarConfig);
+      }
+    );
 
-        // Don't display the hourMinute component until some day is selected
-        this.showHourMinute = false;
-      });
-      console.log ('Calendar created!');
-      this.calendarConfig = this.getCalendarConfigFromDate ();
-      console.log ('Calendar config: ' + JSON.stringify (this.calendarConfig,null,2));
-      await this._daySelector.setConfig (this.calendarConfig);
+  }
+
+  componentDidLoad() {
+    console.log('Component has been rendered');
+    this.initCalendarComponent();
+
   }
 
   async componentWillLoad() {
@@ -174,16 +231,32 @@ export class MakeBookingComponent {
         }
       })
       const restData = restQuery.data;
+
+      // Load special openings
+      const special_opening_Query = await this._apolloProvider.getApolloClient().query<RestaurantSpecialOpeningsToSixMonthsQuery> ({
+        query: RestaurantSpecialOpeningsToSixMonths,
+        variables: {
+          b_r_id: this.restid,
+          month: this.bookingInfo.day.month() + 1,
+          year: this.bookingInfo.day.year()
+        }
+      })
+      const special_opening_Data = special_opening_Query.data;
+
+      if (special_opening_Data.getRestaurantById.special_openings) {
+        // Fetch the data
+        this.special_openings = special_opening_Data.getRestaurantById.special_openings
+      }
+
       // console.log ("Restaurant info retrieved: " + JSON.stringify(data, null, 2));
       if (restData.getRestaurantById.opening && restData.getRestaurantById.services && this.validateRestData(restData)) {
         // Fetch the data
         this.opening = restData.getRestaurantById.opening;
+        this.default_services = restData.getRestaurantById.services;
         this.services = restData.getRestaurantById.services;
         this.openHoursPerDay = new Map<string, DayHours>();
 
         this.bookingInfo.day = this.findFirstBookingTime();
-
-        await this.initCalendarComponent();
         
         await this.setHourMinuteConfigForDate ();
 
@@ -207,12 +280,14 @@ export class MakeBookingComponent {
     let availableHours:DayHours;
 
     do {
+      console.log('candidateDate: ', candidateDate)
       availableHours = this._getOpeningHoursForDay(candidateDate)
+      console.log('availableHours: ', availableHours)
       if (availableHours.services.length === 0) {
         // Evaluate next day
         candidateDate.add(1,'day').startOf('day');
       }
-    } while (availableHours.services.length === 0);
+    } while (availableHours.services.length === 0 || candidateDate < moment().add(6,'M').endOf('month'));
     // Return the first date of the first service for that day
     return availableHours.services[0].range.start;
   }
@@ -228,26 +303,25 @@ export class MakeBookingComponent {
     )
   }
 
-  private getCalendarConfigFromDate (): CalendarConfig {
-      return {
-        weekdaysEnabled: this.opening.open_weekdays,
-        disabledDays: this.getDisabledDaysInMonth(this.bookingInfo.day),
-        multiSelection: false,
-        todayTomorrow: false,
-        dateFrom: this.bookingInfo.day.toDate()
-      };
-  }
-
-  private getDisabledDaysInMonth (currDay: Moment.Moment):Date[] {
-    const closing_days:Moment.Moment[] = (this.opening.closing_days) ? (this.opening.closing_days as string[]).map (dateStr => moment(dateStr, 'YYYY/MM/DD')) : [];
-
-    if (closing_days.length == 0) {
-      return []
-    } else {
-      const today = moment();
-      // Return the days ahead of today and in the month being displayed.
-      return closing_days.filter ((day) => ((day.diff (today, 'days')>=0) && (currDay.diff (day, 'months') == 0))).map ((day) => day.toDate());
+  private getBookingIntervalByService (rs_id: string) {
+    // Return booking interval for a restaurant service
+    let svc = this.services.find((service)=> { return (service.rs_id === rs_id) })
+    // Set service booking interval
+    switch (svc.booking_config.booking_freq) {
+      case ('quarterly'):
+        this.bookingInterval = MinutesInterval.QUARTERLY;
+        break;
+      case ('half'):
+        this.bookingInterval = MinutesInterval.HALF;
+        break;
+      case ('full'):
+        this.bookingInterval = MinutesInterval.FULL;
+        break;
+      default:
+        this.bookingInterval = MinutesInterval.HALF;
     }
+    //Return booking interval for input rs_id
+    return this.bookingInterval
   }
 
   private async setHourMinuteConfigForDate () {
@@ -281,6 +355,18 @@ export class MakeBookingComponent {
       return dh;
     }
 
+    // 2.1 Check if selected date is special date
+    // If special date -> load special date services. Else -> load default services
+    if ( this.isSpecialDate(day) ) {
+      const specialOpening = this.getSpecialOpening(day)
+      if (specialOpening && specialOpening.services) {
+        this.services = specialOpening.services
+      }
+    }
+    else {
+      this.services = this.default_services
+    }
+
     /*
     3. Filter the services according to the following:
       a. Services that are allowed to be booked online
@@ -307,12 +393,15 @@ export class MakeBookingComponent {
           const svcRange = moment.range (startTime, endTime);
           let serviceValidRange:ServiceRange = {id: svc.rs_id, range: svcRange};
           
+          // Get booking interval for current service
+          this.bookingInterval = this.getBookingIntervalByService(svc.rs_id)
+
           if (d.isSame(day, 'day')) {
             // console.log ("TODAY");
             // (c.) If the selected day is the current day, check the start and end service time.
             // If the service has the in_advance parameter set, we add these minutes to current time, 
             // as it's the soonest time this service can be booked in advance.
-            let soonestBookingTimeFromNow = (svc.booking_config.in_advance) ? moment().add (svc.booking_config.in_advance, 'minutes') : moment();
+            let soonestBookingTimeFromNow = (svc.booking_config.in_advance_booking) ? moment().add (svc.booking_config.in_advance_booking, 'minutes') : moment();
             // Get the number of minutes to the next interval
             const minsToNextInterval = this.bookingInterval - (soonestBookingTimeFromNow.minute() % this.bookingInterval);
             soonestBookingTimeFromNow.add (minsToNextInterval, 'minutes').startOf('minute');
@@ -412,10 +501,12 @@ export class MakeBookingComponent {
       made_on: new Date().toISOString(),
       num_pax: this.bookingInfo.pax,
       notes: this.bookingInfo.notes,
-      phone: this.bookingInfo.phone,
-      email: this.bookingInfo.email,
-      name: this.bookingInfo.name,
-      surname: this.bookingInfo.surname,
+      contact_info: {
+        email:this.bookingInfo.email,
+        name: this.bookingInfo.name,
+        surname: this.bookingInfo.surname,
+        phone: this.bookingInfo.phone
+      },
       channel: 'external_web',
       service: this._getOpeningHoursForDay(this.bookingInfo.day).services.find (service => this.bookingInfo.day.within(service.range)).id
     };
@@ -426,7 +517,7 @@ export class MakeBookingComponent {
       const mutationResult = await this._apolloProvider.getApolloClient().mutate<ExtBookRequestInput> ({
         mutation: CreateBookRequest,
         variables: {
-          booking_info: bookRequestInput
+          book_request: bookRequestInput
         }
       })
 
@@ -480,13 +571,66 @@ export class MakeBookingComponent {
   _getHoursToDisplayForDay (day:Moment.Moment) {
     const dayHours = this._getOpeningHoursForDay(day);
     const hoursList = dayHours.services.map (serviceSlot => {
-      const serviceSlotList = Array.from(serviceSlot.range.by ('minutes', {excludeEnd: true, step: MinutesInterval.HALF}))
+
+      // Get booking interval for current service
+      this.bookingInterval = this.getBookingIntervalByService(serviceSlot.id)
+      // Set service time slots
+      const serviceSlotList = Array.from(serviceSlot.range.by ('minutes', {excludeEnd: true, step: this.bookingInterval}))
       return serviceSlotList
     }).reduce ((prev, curr) => {
       const res = prev.concat(curr);
       return res;
     });
     return hoursList
+  }
+
+  isClosingDate(date: Moment.Moment) {
+    // Check if input date is closed
+    const weekdays = Moment.weekdays()
+    const weekday: number = date.weekday()
+    // 1. Check if input date exist in this.opening.closing_days
+    if(this.opening.closing_days && this.opening.closing_days.includes(date.format('YYYY/MM/DD')) ) return true
+    // 2. Check if date weekday is closed
+    else if (!this.opening.open_weekdays.includes(weekdays[weekday].toLowerCase())) return true
+    // 3. Check if its a special date
+    else if (this.isSpecialDate(date)) {
+      // Get special opening
+      let special_opening = this.special_openings.find(sp_o => {
+        return (sp_o.from <= date.format('YYYY/MM/DD') && sp_o.to >= date.format('YYYY/MM/DD'))
+      })
+
+      if(special_opening) {
+        // Check in special opening if date weekday is closed
+        if (!special_opening.open_weekdays.includes(weekdays[weekday].toLowerCase())) return true
+        else return false
+      }
+    } 
+    else return false
+  }
+
+  isSpecialDate(date: Moment.Moment) {
+    // Check if input date is special date
+    if(this.special_openings && this.special_openings.length > 0){
+      let special_opening = this.special_openings.find(sp_o => {
+        return (sp_o.from <= date.format('YYYY/MM/DD') && sp_o.to >= date.format('YYYY/MM/DD'))
+      })
+      // If special date was found return true
+      if(special_opening) return true
+      else return false
+    }
+    else return false
+  }
+
+  getSpecialOpening(date: Moment.Moment) {
+    // Return special opening for input day
+    if(this.special_openings && this.special_openings.length > 0){
+      let special_opening = this.special_openings.find(sp_o => {
+        return (sp_o.from <= date.format('YYYY/MM/DD') && sp_o.to >= date.format('YYYY/MM/DD'))
+      })
+      // If special date was found return the special opening
+      if(special_opening) return special_opening
+      else return
+    }
   }
 
   render () {
@@ -540,7 +684,7 @@ export class MakeBookingComponent {
               <svg height="7" viewBox="0 0 100 56" width="13" xmlns="http://www.w3.org/2000/svg"><path d="m45.6195417 76.1916897-43.80544294-43.6532449c-2.41879835-2.4103944-2.41879835-6.3195686 0-8.730649 2.41948667-2.4103944 6.34229025-2.4103944 8.76108864 0l39.4248986 39.2879204 39.4248987-39.2879204c2.4187984-2.4103944 6.3416019-2.4103944 8.7604003 0 2.419487 2.4110804 2.419487 6.3202546 0 8.730649l-43.8047547 43.6532449c-2.4194866 2.4110804-6.3416019 2.4110804-8.7610886 0" fill-rule="evenodd" transform="translate(0 -22)"/></svg>
             </span>
           </div>
-          <div class="submit-booking-col" onClick = {this.toggleCalendarShow.bind(this)}>
+          <div class="submit-booking-col" id="booking-cal-container">
               <label class="booking-bar-date">{ this.bookingInfo.day.toDate().toLocaleDateString(navigator.language, { year: 'numeric', month: 'short', day: 'numeric' }) }</label>
               <span class="icon">
                 <svg height="7" viewBox="0 0 100 56" width="13" xmlns="http://www.w3.org/2000/svg"><path d="m45.6195417 76.1916897-43.80544294-43.6532449c-2.41879835-2.4103944-2.41879835-6.3195686 0-8.730649 2.41948667-2.4103944 6.34229025-2.4103944 8.76108864 0l39.4248986 39.2879204 39.4248987-39.2879204c2.4187984-2.4103944 6.3416019-2.4103944 8.7604003 0 2.419487 2.4110804 2.419487 6.3202546 0 8.730649l-43.8047547 43.6532449c-2.4194866 2.4110804-6.3416019 2.4110804-8.7610886 0" fill-rule="evenodd" transform="translate(0 -22)"/></svg>
@@ -572,7 +716,6 @@ export class MakeBookingComponent {
 
         {(this.showCalendar) &&
           <div id="booking-cal-container" class="calendar-container">
-            { this._daySelector.renderCalendar() }
           </div>
         }
 
@@ -676,7 +819,7 @@ enum MinutesInterval {
   FULL = 60
 }
 
-const getCheftonicDate = (date: Date) => (date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate());
+const getCheftonicDate = (date: Date) => (date.getFullYear() + '/' + ("0" + (date.getMonth() + 1)).slice(-2) + '/' + date.getDate());
 
 const getCheftonicLogo = () => {
   return (
