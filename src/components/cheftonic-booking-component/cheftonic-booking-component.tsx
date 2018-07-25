@@ -185,6 +185,7 @@ export class MakeBookingComponent {
     this.drp = new daterangepicker (
       this.calendar_container.shadowRoot.getElementById('booking-cal-container'),    
       {
+        parentEl: '#booking-cal-container',
         timePicker: false,
         singleDatePicker: true,
         autoApply: true,
@@ -686,11 +687,12 @@ export class MakeBookingComponent {
             </span>
           </div>
           <div class="submit-booking-col" id="booking-cal-container">
-              <label class="booking-bar-date">{ this.bookingInfo.day.toDate().toLocaleDateString(navigator.language, { year: 'numeric', month: 'short', day: 'numeric' }) }</label>
-              <span class="icon">
-                <svg height="7" viewBox="0 0 100 56" width="13" xmlns="http://www.w3.org/2000/svg"><path d="m45.6195417 76.1916897-43.80544294-43.6532449c-2.41879835-2.4103944-2.41879835-6.3195686 0-8.730649 2.41948667-2.4103944 6.34229025-2.4103944 8.76108864 0l39.4248986 39.2879204 39.4248987-39.2879204c2.4187984-2.4103944 6.3416019-2.4103944 8.7604003 0 2.419487 2.4110804 2.419487 6.3202546 0 8.730649l-43.8047547 43.6532449c-2.4194866 2.4110804-6.3416019 2.4110804-8.7610886 0" fill-rule="evenodd" transform="translate(0 -22)"/></svg>
-              </span>
+            <label class="booking-bar-date">{ this.bookingInfo.day.toDate().toLocaleDateString(navigator.language, { year: 'numeric', month: 'short', day: 'numeric' }) }</label>
+            <span class="icon">
+              <svg height="7" viewBox="0 0 100 56" width="13" xmlns="http://www.w3.org/2000/svg"><path d="m45.6195417 76.1916897-43.80544294-43.6532449c-2.41879835-2.4103944-2.41879835-6.3195686 0-8.730649 2.41948667-2.4103944 6.34229025-2.4103944 8.76108864 0l39.4248986 39.2879204 39.4248987-39.2879204c2.4187984-2.4103944 6.3416019-2.4103944 8.7604003 0 2.419487 2.4110804 2.419487 6.3202546 0 8.730649l-43.8047547 43.6532449c-2.4194866 2.4110804-6.3416019 2.4110804-8.7610886 0" fill-rule="evenodd" transform="translate(0 -22)"/></svg>
+            </span>
           </div>
+          
           <div class="submit-booking-col" onClick = {this.toggleTimeShow.bind(this)}>
             <label class="booking-bar-Time">{ this.bookingInfo.day.format ('HH:mm') }</label>
             <span class="icon">
